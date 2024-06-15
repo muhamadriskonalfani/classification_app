@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <!-- bootstrap 5 link -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- font awesome cdn link -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap');
+
+        :root {
+            --white: #fff;
+            --grey1: #666;
+            --grey2: #444;
+            --grey3: #222;
+            --bg-light: #f8f9fa;
+            
+            --border: 1px solid black;
+            /* --border: none; */
+        }
+        
+        * {
+            font-family: "Comfortaa", sans-serif;
+        }
+        
+        *::-webkit-scrollbar {
+            display: none;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        
+            /* border: var(--border); */
+        }
+        
+        .container-fluid {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            overflow: scroll;
+        
+            /* border: var(--border); */
+        }
+        
+        .container {
+            position: absolute;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.8s ease; 
+        }
+        
+        
+    </style>
+
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="container">
+            <h1>CRUD App</h1>
+    
+            <!-- Form untuk menambahkan item baru -->
+            <form action="/add" method="post">
+                <input type="text" name="name" placeholder="Nama" required>
+                <input type="text" name="description" placeholder="Deskripsi" required>
+                <button type="submit">Tambah Item</button>
+            </form>
+            
+            <!-- Daftar item yang telah ditambahkan -->
+            <ul>
+                {% for item in items %}
+                <li>{{ item[1] }} - {{ item[2] }} 
+                    <a href="/edit/{{ item[0] }}">Edit</a> 
+                    <form action="/delete/{{ item[0] }}" method="post" style="display: inline;">
+                        <button type="submit">Hapus</button>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
