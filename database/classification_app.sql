@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 15 Jun 2024 pada 13.40
+-- Waktu pembuatan: 15 Jun 2024 pada 13.53
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -18,20 +18,20 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `crud_db`
+-- Database: `classification_app`
 --
 
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `items`
+-- Struktur dari tabel `tb_gambar`
 --
 
-CREATE TABLE `items` (
-  `id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `description` varchar(255) NOT NULL,
-  `image` varchar(255) NOT NULL
+CREATE TABLE `tb_gambar` (
+  `id_gambar` int(11) NOT NULL,
+  `nama` varchar(255) NOT NULL,
+  `gambar` varchar(255) NOT NULL,
+  `status` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -39,20 +39,20 @@ CREATE TABLE `items` (
 --
 
 --
--- Indeks untuk tabel `items`
+-- Indeks untuk tabel `tb_gambar`
 --
-ALTER TABLE `items`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE `tb_gambar`
+  ADD PRIMARY KEY (`id_gambar`);
 
 --
 -- AUTO_INCREMENT untuk tabel yang dibuang
 --
 
 --
--- AUTO_INCREMENT untuk tabel `items`
+-- AUTO_INCREMENT untuk tabel `tb_gambar`
 --
-ALTER TABLE `items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+ALTER TABLE `tb_gambar`
+  MODIFY `id_gambar` int(11) NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

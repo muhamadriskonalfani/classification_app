@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klasifikasi</title>
+
+    <!-- bootstrap 5 link -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- font awesome cdn link -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <!-- custom css link -->
+    <link rel="stylesheet" href="assets/custom/style_index1.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap');
+
+        :root {
+            --white: #fff;
+            --grey1: #666;
+            --grey2: #444;
+            --grey3: #222;
+            --bg-light: #f8f9fa;
+            
+            --border: 1px solid black;
+            /* --border: none; */
+        }
+        
+        * {
+            font-family: "Comfortaa", sans-serif;
+        }
+        
+        *::-webkit-scrollbar {
+            display: none;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        
+            /* border: var(--border); */
+        }
+        
+        .container-fluid {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            overflow: scroll;
+        
+            /* border: var(--border); */
+        }
+        
+        .container {
+            position: absolute;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.8s ease; 
+        }
+        
+        .left {
+            width: 50rem;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .right {
+            width: 50rem;
+            right: -50rem; 
+        }
+        
+        
+        .box-input {
+            display: grid;
+            grid-template-areas: 'header'
+                                 'input';
+            grid-template-rows: 1fr 4fr;
+            padding: 2rem;
+            gap: 2rem;
+        
+            /* border: 1px solid red; */
+        }
+        
+        .box-input .box-header {
+            grid-area: header;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 4rem;
+        
+            /* border: var(--border); */
+        }
+        
+        .box-input .box-header h2 {
+            margin: 0;
+        }
+        
+        .box-input .box-main-input {
+            grid-area: input;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            border-radius: 10px;
+        
+            border: 2px dashed grey;
+        }
+
+        
+        .box-output {
+            padding: 2rem;
+        }
+
+        .box-output .table {
+            text-align: center;
+        }
+        
+
+        .container-loading {
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: white;
+        }
+        
+        .spinner-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 8rem;
+            height: 8rem;
+            overflow: hidden;
+            border-radius: 50%;
+        }
+
+        .spinner {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 8rem;
+            height: 8rem;
+            background: #0f0;
+            border-radius: 50%;
+            animation: animate 1s linear infinite;
+        }
+        
+        .spinner::before {
+            content: '';
+            position: absolute;
+            width: 5rem;
+            height: 5rem;
+            transform: rotate(45deg);
+            background: white;
+            right: -3rem;
+        }
+
+        .spinner::after {
+            content: '';
+            position: absolute;
+            inset: 1rem;
+            background: white;
+            border-radius: 50%;
+        }
+
+        @keyframes animate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        #progress-percentage {
+            position: absolute;
+            font-size: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: white;
+        }
+
+
+
+        h2, h5 {
+            margin: 0;
+        }
+
+        .hide {
+            display: none;
+        }
+
+                
+    </style>
+
+</head>
+<body>
+    <div class="container-fluid" style="display: none;">
+        <div class="container left">
+            <div class="box-input">
+                <div class="box-header">
+                    <h2 class="text-secondary">Rice Leaf Diseases</h2>
+                    <h5 id="hasil_load" class="text-secondary">Rice Leaf Diseases</h5>
+                </div>
+                <div class="box-main-input">
+                    <form action="/classification" method="POST" enctype="multipart/form-data">
+                        <input type="file" name="file" class="input-file hide">
+                        <button class="btn btn-success btn-lg input-file-btn"><i class="fa fa-plus"></i> Pilih gambar</button>
+                        <button type="submit" name="submit" class="submit-file hide"></button>
+                    </form>
+                    <p>Pilih gambar daun padi yang terinfeksi untuk mengetahui jenis penyakitnya.</p>
+                </div>
+            </div>
+
+            <div class="box-output">
+                {% if file_url %}
+                    <form action="/classification" method="POST">
+                        <input type="text" name="file_path" class="hide" value="{{ file_path }}">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nama File</th>
+                                    <th>Keterangan</th>
+                                    <th>Pilihan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>{{ file_name }}</td>
+                                    <td>{{ custom_message }}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-primary btn-sm" onclick="detail()">Detail</button>
+                                        <button type="submit" name="clear" class="btn btn-secondary btn-sm">Hapus</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                {% endif %}
+            </div>
+
+            <button id="leftButton" class="hide">Move Left</button>
+        </div>
+
+        <div class="container right">
+            {% if file_url %}
+                <div class="display">
+                    <img src="{{ file_url }}" alt="Uploaded Image" class="img-thumbnail" style="max-width: 400px;">
+                    <h5 class="mt-4 mb-2">{{ custom_message }}</h5>
+                </div>
+            {% endif %}
+            <div class="description">
+                <div class="bacterial-leaf-blight hide">
+                    <p>Bacterial leaf blight adalah penyakit yang disebabkan oleh bakteri <i>Xanthomonas oryzae pv. oryzae</i>. Gejala awal biasanya berupa garis-garis berair pada daun yang kemudian menguning dan mengering, membentuk bercak-bercak coklat. Infeksi dapat menyebar dengan cepat dalam kondisi lembab dan dapat menyebabkan kerusakan parah pada hasil panen.</p>
+                </div>
+                <div class="brown-spot hide">
+                    <p>Brown spot adalah penyakit yang disebabkan oleh jamur <i>Bipolaris oryzae</i>. Gejala penyakit ini adalah adanya bintik-bintik coklat pada daun, terutama pada tanaman yang lemah atau yang mengalami stres. Bintik-bintik ini biasanya berbentuk oval atau bulat dengan pusat berwarna coklat gelap dan tepi yang lebih terang. Penyakit ini dapat mengurangi kemampuan fotosintesis tanaman dan menyebabkan penurunan hasil.</p>
+                </div>
+                <div class="leaf-smut hide">
+                    <p>Leaf smut adalah penyakit yang disebabkan oleh jamur <i>Entyloma oryzae</i>. Gejala utama dari leaf smut adalah adanya bintik-bintik hitam kecil atau garis-garis hitam pada daun padi. Bintik-bintik ini adalah spora jamur yang dapat menyebar ke tanaman lain. Penyakit ini biasanya tidak menyebabkan kerusakan yang signifikan, tetapi dapat mengurangi estetika tanaman dan, pada kasus yang parah, dapat menurunkan hasil panen.</p>
+                </div>
+            </div>
+            
+            <button id="rightButton" class="btn btn-primary">Kembali</button>
+        </div>
+    </div>
+
+    <div class="container-loading">
+        <div class="spinner-container">
+            <div class="spinner"></div>
+            <div id="progress-percentage">100%</div>
+        </div>
+        <h2 class="step-process text-secondary mt-4">Membuat Model Klasifikasi</h2>
+    </div>
+
+    <script>
+        // Update progress bar
+        function updateProgress() {
+            fetch('/progress')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.progress < 101) {
+                        document.getElementById('progress-percentage').innerText = `${data.progress}%`;
+                        setTimeout(updateProgress, 200);
+                    } 
+                });
+        }
+
+        async function trainModelClassification() {
+            const response = await fetch('/latih_model_klasifikasi', {
+                method: 'GET'
+            });
+            const data = await response.json();
+            document.getElementById('hasil_load').innerText = `Status Model: ${data.hasil_model}`;
+            document.querySelector('.container-loading').style.display = 'none';
+            document.querySelector('.container-fluid').style.display = 'flex';
+        }
+
+        // Membuat model klasifikasi sebelum halaman ditampilkan
+        document.addEventListener('DOMContentLoaded', function() {
+            updateProgress();
+            trainModelClassification();
+        });
+
+
+        const containerLeft     = document.querySelector('.container.left')
+        const containerRight    = document.querySelector('.container.right')
+        const leftButton        = document.getElementById('leftButton')
+        const rightButton       = document.getElementById('rightButton')
+        const inputFileBtn      = document.querySelector('.box-main-input button.input-file-btn')
+        const fileInput         = document.querySelector('.box-main-input input[name="file"].input-file')
+        const submitButton      = document.querySelector('.box-main-input button[name="submit"].submit-file')
+
+
+        // Geser halaman ke kiri
+        leftButton.addEventListener('click', function() {
+            containerLeft.style.transform = 'translateX(-200%)';
+            containerRight.style.right = '50%';
+            containerRight.style.transform = 'translateX(50%)';
+        });
+
+        // Geser halaman ke kanan
+        rightButton.addEventListener('click', function() {
+            containerRight.style.right = '-50rem';
+            containerRight.style.transform = 'translateX(0)';
+            containerLeft.style.transform = 'translateX(-50%)';
+        });
+
+
+        // Tombol "Pilih gambar", otomatis klik tombol upload file
+        inputFileBtn.addEventListener('click', function(event) {
+            event.preventDefault();
+            fileInput.click();
+        });
+
+        // Submit otomatis setelah input file terisi
+        fileInput.addEventListener('change', function() {
+            if (fileInput.files.length > 0) {
+                submitButton.click();
+            }
+        });
+
+
+
+
+        const blb   = document.querySelector('.bacterial-leaf-blight');
+        const bs    = document.querySelector('.brown-spot');
+        const ls    = document.querySelector('.leaf-smut');
+
+        // Tampilkan deskripsi penyakit
+        document.addEventListener("DOMContentLoaded", function() {
+            {% if file_url %}
+                {% if custom_message == 'Bacterial leaf blight' %}
+                    blb.classList.remove('hide');
+                    bs.classList.add('hide');
+                    ls.classList.add('hide');
+                {% elif custom_message == 'Brown spot' %}
+                    blb.classList.add('hide');
+                    bs.classList.remove('hide');
+                    ls.classList.add('hide');
+                {% elif custom_message == 'Leaf smut' %}
+                    blb.classList.add('hide');
+                    bs.classList.add('hide');
+                    ls.classList.remove('hide');
+                {% endif %}
+            {% endif %}
+        });
+
+
+
+
+        // Fungsi tambahan
+        function detail() {
+            leftButton.click();
+        }
+
+
+
+        submitButton.addEventListener('click', function() {
+            document.querySelector('.container-fluid').style.display = 'none';
+            document.querySelector('.container-loading .step-process').innerText = 'Memindai';
+            document.querySelector('.container-loading').style.display = 'flex';
+            setTimeout(updateProgress, 200);
+        })
+        
+
+    </script>
+</body>
+</html>
+

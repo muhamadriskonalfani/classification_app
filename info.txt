@@ -1,0 +1,3 @@
+Library silahkan install sendiri di terminal atau command prompt
+Kode instalasi: 
+- pip install opencv-python-headless numpy scikit-image scikit-learn

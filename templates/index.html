@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Rice Leaf Diseases</title>
 
     <!-- bootstrap 5 link -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- font awesome cdn link -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <!-- custom css link -->
+    <link rel="stylesheet" href="assets/custom/style_index1.css">
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap');
@@ -58,43 +61,24 @@
         
         .container {
             position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             padding: 20px;
             text-align: center;
             transition: all 0.8s ease; 
         }
-        
-        
     </style>
 
 </head>
 <body>
     <div class="container-fluid">
         <div class="container">
-            <h1>CRUD App</h1>
-    
-            <!-- Form untuk menambahkan item baru -->
-            <form action="/add" method="post" enctype="multipart/form-data">
-                <input type="text" name="name" placeholder="Nama" required>
-                <input type="text" name="description" placeholder="Deskripsi" required>
-                <input type="file" name="image" accept="image/*">
-                <button type="submit">Tambah Item</button>
-            </form>
-            
-            <!-- Daftar item yang telah ditambahkan -->
-            <ul>
-                {% for item in items %}
-                <li>
-                    {{ item[1] }} - {{ item[2] }}
-                    {% if item[3] %}
-                        <img src="{{ url_for('uploaded_file', filename=item[3]) }}" alt="{{ item[1] }}" style="width:100px;">
-                    {% endif %}
-                    <a href="/edit/{{ item[0] }}">Edit</a> 
-                    <form action="/delete/{{ item[0] }}" method="post" style="display: inline;">
-                        <button type="submit">Hapus</button>
-                    </form>
-                </li>
-                {% endfor %}
-            </ul>
+            <h1>Rice Leaf Diseases</h1>
+            <a href="/classification" class="btn btn-dark">Start Now</a>
         </div>
     </div>
 </body>
