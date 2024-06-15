@@ -73,16 +73,21 @@
             <h1>CRUD App</h1>
     
             <!-- Form untuk menambahkan item baru -->
-            <form action="/add" method="post">
+            <form action="/add" method="post" enctype="multipart/form-data">
                 <input type="text" name="name" placeholder="Nama" required>
                 <input type="text" name="description" placeholder="Deskripsi" required>
+                <input type="file" name="image" accept="image/*">
                 <button type="submit">Tambah Item</button>
             </form>
             
             <!-- Daftar item yang telah ditambahkan -->
             <ul>
                 {% for item in items %}
-                <li>{{ item[1] }} - {{ item[2] }} 
+                <li>
+                    {{ item[1] }} - {{ item[2] }}
+                    {% if item[3] %}
+                        <img src="{{ url_for('uploaded_file', filename=item[3]) }}" alt="{{ item[1] }}" style="width:100px;">
+                    {% endif %}
                     <a href="/edit/{{ item[0] }}">Edit</a> 
                     <form action="/delete/{{ item[0] }}" method="post" style="display: inline;">
                         <button type="submit">Hapus</button>
@@ -94,3 +99,4 @@
     </div>
 </body>
 </html>
+

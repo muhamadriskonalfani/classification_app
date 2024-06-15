@@ -71,14 +71,16 @@
     <div class="container-fluid">
         <div class="container">
             <h1>Edit Item</h1>
-
+    
             <!-- Form untuk mengedit item -->
-            <form action="/edit/{{ item[0] }}" method="post">
+            <form action="/edit/{{ item[0] }}" method="post" enctype="multipart/form-data">
                 <input type="text" name="name" placeholder="Nama" value="{{ item[1] }}" required>
                 <input type="text" name="description" placeholder="Deskripsi" value="{{ item[2] }}" required>
+                <input type="file" name="image" accept="image/*">
                 <button type="submit">Simpan Perubahan</button>
             </form>
         </div>
     </div>
 </body>
 </html>
+
