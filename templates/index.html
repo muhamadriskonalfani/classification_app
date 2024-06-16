@@ -11,9 +11,6 @@
     <!-- font awesome cdn link -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
-    <!-- custom css link -->
-    <link rel="stylesheet" href="assets/custom/style_index1.css">
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap');
 
@@ -78,7 +75,7 @@
     <div class="container-fluid">
         <div class="container">
             <h1>Rice Leaf Diseases</h1>
-            <a href="/classification" class="btn btn-dark">Start Now</a>
+            <a href="{{ url_for('training_model') }}" class="btn btn-dark">Start Now</a>
         </div>
     </div>
 </body>

@@ -11,9 +11,6 @@
     <!-- font awesome cdn link -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
-    <!-- custom css link -->
-    <link rel="stylesheet" href="assets/custom/style_index1.css">
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap');
 
@@ -153,7 +150,7 @@
             align-items: center;
             width: 8rem;
             height: 8rem;
-            background: #0f0;
+            background: black;
             border-radius: 50%;
             animation: animate 1s linear infinite;
         }
@@ -209,12 +206,11 @@
 
 </head>
 <body>
-    <div class="container-fluid" style="display: none;">
+    <div class="container-fluid">
         <div class="container left">
             <div class="box-input">
                 <div class="box-header">
                     <h2 class="text-secondary">Rice Leaf Diseases</h2>
-                    <h5 id="hasil_load" class="text-secondary">Rice Leaf Diseases</h5>
                 </div>
                 <div class="box-main-input">
                     <form action="/classification" method="POST" enctype="multipart/form-data">
@@ -241,7 +237,7 @@
                             <tbody>
                                 <tr>
                                     <td>{{ file_name }}</td>
-                                    <td>{{ custom_message }}</td>
+                                    <td>{{ prediction }}</td>
                                     <td>
                                         <button type="button" class="btn btn-primary btn-sm" onclick="detail()">Detail</button>
                                         <button type="submit" name="clear" class="btn btn-secondary btn-sm">Hapus</button>
@@ -260,7 +256,7 @@
             {% if file_url %}
                 <div class="display">
                     <img src="{{ file_url }}" alt="Uploaded Image" class="img-thumbnail" style="max-width: 400px;">
-                    <h5 class="mt-4 mb-2">{{ custom_message }}</h5>
+                    <h5 class="mt-4 mb-2">{{ prediction }}</h5>
                 </div>
             {% endif %}
             <div class="description">
@@ -279,10 +275,10 @@
         </div>
     </div>
 
-    <div class="container-loading">
+    <div class="container-loading" style="display: none;">
         <div class="spinner-container">
             <div class="spinner"></div>
-            <div id="progress-percentage">100%</div>
+            <div id="progress-percentage">0%</div>
         </div>
         <h2 class="step-process text-secondary mt-4">Membuat Model Klasifikasi</h2>
     </div>
@@ -295,26 +291,10 @@
                 .then(data => {
                     if (data.progress < 101) {
                         document.getElementById('progress-percentage').innerText = `${data.progress}%`;
-                        setTimeout(updateProgress, 200);
+                        setTimeout(updateProgress, 500);
                     } 
                 });
         }
-
-        async function trainModelClassification() {
-            const response = await fetch('/latih_model_klasifikasi', {
-                method: 'GET'
-            });
-            const data = await response.json();
-            document.getElementById('hasil_load').innerText = `Status Model: ${data.hasil_model}`;
-            document.querySelector('.container-loading').style.display = 'none';
-            document.querySelector('.container-fluid').style.display = 'flex';
-        }
-
-        // Membuat model klasifikasi sebelum halaman ditampilkan
-        document.addEventListener('DOMContentLoaded', function() {
-            updateProgress();
-            trainModelClassification();
-        });
 
 
         const containerLeft     = document.querySelector('.container.left')
@@ -354,6 +334,14 @@
             }
         });
 
+        // Aksi setelah input file di submit
+        submitButton.addEventListener('click', function() {
+            document.querySelector('.container-fluid').style.display = 'none';
+            document.querySelector('.container-loading .step-process').innerText = 'Memindai';
+            document.querySelector('.container-loading').style.display = 'flex';
+            updateProgress();
+        });
+
 
 
 
@@ -364,15 +352,15 @@
         // Tampilkan deskripsi penyakit
         document.addEventListener("DOMContentLoaded", function() {
             {% if file_url %}
-                {% if custom_message == 'Bacterial leaf blight' %}
+                {% if prediction == 'Bacterial leaf blight' %}
                     blb.classList.remove('hide');
                     bs.classList.add('hide');
                     ls.classList.add('hide');
-                {% elif custom_message == 'Brown spot' %}
+                {% elif prediction == 'Brown spot' %}
                     blb.classList.add('hide');
                     bs.classList.remove('hide');
                     ls.classList.add('hide');
-                {% elif custom_message == 'Leaf smut' %}
+                {% elif prediction == 'Leaf smut' %}
                     blb.classList.add('hide');
                     bs.classList.add('hide');
                     ls.classList.remove('hide');
@@ -389,13 +377,6 @@
         }
 
 
-
-        submitButton.addEventListener('click', function() {
-            document.querySelector('.container-fluid').style.display = 'none';
-            document.querySelector('.container-loading .step-process').innerText = 'Memindai';
-            document.querySelector('.container-loading').style.display = 'flex';
-            setTimeout(updateProgress, 200);
-        })
         
 
     </script>

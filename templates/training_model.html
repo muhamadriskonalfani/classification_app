@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rice Leaf Diseases</title>
+
+    <!-- bootstrap 5 link -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- font awesome cdn link -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap');
+
+        :root {
+            --white: #fff;
+            --grey1: #666;
+            --grey2: #444;
+            --grey3: #222;
+            --bg-light: #f8f9fa;
+            
+            --border: 1px solid black;
+            /* --border: none; */
+        }
+        
+        * {
+            font-family: "Comfortaa", sans-serif;
+        }
+        
+        *::-webkit-scrollbar {
+            display: none;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        
+            /* border: var(--border); */
+        }
+        
+        .container-fluid {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: scroll;
+        
+            /* border: var(--border); */
+        }
+        
+        .spinner-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 8rem;
+            height: 8rem;
+            overflow: hidden;
+            border-radius: 50%;
+        }
+
+        .spinner {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 8rem;
+            height: 8rem;
+            background: black;
+            border-radius: 50%;
+            animation: animate 1s linear infinite;
+        }
+        
+        .spinner::before {
+            content: '';
+            position: absolute;
+            width: 5rem;
+            height: 5rem;
+            transform: rotate(45deg);
+            background: white;
+            right: -3rem;
+        }
+
+        .spinner::after {
+            content: '';
+            position: absolute;
+            inset: 1rem;
+            background: white;
+            border-radius: 50%;
+        }
+
+        @keyframes animate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        #progress-percentage {
+            position: absolute;
+            font-size: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: white;
+        }
+
+
+
+        h2, h5 {
+            margin: 0;
+        }
+
+
+    </style>
+
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="spinner-container">
+            <div class="spinner"></div>
+            <div id="progress-percentage">0%</div>
+        </div>
+        <h2 class="step-process text-secondary mt-4">Membuat Model Klasifikasi</h2>
+    </div>
+
+    <script>
+        // Update progress bar
+        function updateProgress() {
+            fetch('/progress')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.progress < 101) {
+                        document.getElementById('progress-percentage').innerText = `${data.progress}%`;
+                        setTimeout(updateProgress, 500);
+                    } 
+                });
+        }
+
+        async function trainModelClassification() {
+            const response = await fetch('/latih_model_klasifikasi', {
+                method: 'GET'
+            });
+            const data = await response.json();
+
+            if (data.hasil_model == 'Aktif') {
+                window.location.href = "{{ url_for('classification') }}";
+            }
+        }
+
+        // Membuat model klasifikasi sebelum halaman ditampilkan
+        document.addEventListener('DOMContentLoaded', function() {
+            updateProgress();
+            trainModelClassification();
+        });
+
+
+
+    </script>
+</body>
+</html>
+
