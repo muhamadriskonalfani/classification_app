@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory
 import mysql.connector
+from werkzeug.utils import secure_filename
 import os
 import cv2
 import numpy as np
@@ -42,8 +43,24 @@ def training_model():
 # Route untuk halaman klasifikasi
 @app.route('/classification', methods=['GET', 'POST'])
 def classification():
-    global file_url, file_name, file_path, prediction, progress
+    global progress
+    
     progress = 0  # Set progress kembali ke 0
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM tb_gambar ORDER BY id_gambar DESC")
+    items = cursor.fetchall()
+    
+    cursor.execute("SELECT * FROM tb_gambar ORDER BY id_gambar DESC LIMIT 1")
+    latest = cursor.fetchone()
+    
+    return render_template('classification.html', items=items, latest=latest)
+
+
+# Route untuk menambah item
+@app.route('/add_to_database', methods=['GET', 'POST'])
+def add_to_database():
+    global file_url, file_name, file_path, prediction
+    
     if request.method == 'POST':
         if 'submit' in request.form:
             file = request.files.get('file')
@@ -52,16 +69,32 @@ def classification():
                 file_path = os.path.join(app.config['UPLOAD_FOLDER'], file_name)
                 file.save(file_path)
                 file_url = url_for('static', filename=f'uploads/{file_name}')
-                klasifikasi_gambar_baru()  # Panggil fungsi klasifikasi_gambar_baru untuk memproses gambar
-                return render_template('classification.html', file_url=file_url, file_path=file_path, file_name=file_name, prediction=prediction)
-        elif 'clear' in request.form:
-            file_path = request.form.get('file_path')
-            if file_path and os.path.exists(file_path):
-                os.remove(file_path)
-            file_url = ''
-            file_name = ''
-            prediction = ''
-    return render_template('classification.html', file_url=file_url, file_path='', file_name=file_name, prediction=prediction, progress=progress)
+                klasifikasi_gambar_baru() 
+    
+    cursor = db.cursor()
+    cursor.execute("INSERT INTO tb_gambar (gambar, status) VALUES (%s, %s)", (file_name, prediction))
+    db.commit()
+    
+    return redirect('/classification')
+
+# Route untuk menghapus item
+@app.route('/delete/<int:item_id>', methods=['POST'])
+def delete_from_database(item_id):
+    cursor = db.cursor()
+    cursor.execute("SELECT gambar FROM tb_gambar WHERE id_gambar = %s", (item_id,))
+    image = cursor.fetchone()[0]
+    if image:
+        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], image))
+    cursor.execute("DELETE FROM tb_gambar WHERE id_gambar = %s", (item_id,))
+    db.commit()
+    
+    return redirect('/classification')
+
+
+# Endpoint untuk melayani file statis
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 def load_images_from_folder(folder_path):
     images = []

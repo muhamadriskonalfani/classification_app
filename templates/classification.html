@@ -51,27 +51,33 @@
             display: flex;
             justify-content: center;
             align-items: flex-start;
-            overflow: scroll;
+            overflow: hidden;
         
             /* border: var(--border); */
         }
         
         .container {
             position: absolute;
+            height: 100vh;
             padding: 20px;
             text-align: center;
+            overflow: scroll;
             transition: all 0.8s ease; 
         }
         
-        .left {
+        .container.left {
             width: 50rem;
             left: 50%;
             transform: translateX(-50%);
         }
         
-        .right {
+        .container.right {
             width: 50rem;
             right: -50rem; 
+        }
+
+        .container-scroll {
+            min-height: 120vh;
         }
         
         
@@ -79,7 +85,7 @@
             display: grid;
             grid-template-areas: 'header'
                                  'input';
-            grid-template-rows: 1fr 4fr;
+            grid-template-rows: 1fr 3.5fr;
             padding: 2rem;
             gap: 2rem;
         
@@ -208,70 +214,109 @@
 <body>
     <div class="container-fluid">
         <div class="container left">
-            <div class="box-input">
-                <div class="box-header">
-                    <h2 class="text-secondary">Rice Leaf Diseases</h2>
+            <div class="container-scroll">
+                <div class="box-input">
+                    <div class="box-header">
+                        <h2 class="text-secondary">Rice Leaf Diseases</h2>
+                    </div>
+                    <div class="box-main-input">
+                        <form action="/add_to_database" method="POST" enctype="multipart/form-data">
+                            <input type="file" name="file" class="input-file hide">
+                            <button class="btn btn-primary btn-lg input-file-btn"><i class="fa fa-plus"></i> Pilih gambar</button>
+                            <button type="submit" name="submit" class="submit-file hide"></button>
+                        </form>
+                        <p>Pilih gambar daun padi yang terinfeksi untuk mengetahui jenis penyakitnya.</p>
+                    </div>
                 </div>
-                <div class="box-main-input">
-                    <form action="/classification" method="POST" enctype="multipart/form-data">
-                        <input type="file" name="file" class="input-file hide">
-                        <button class="btn btn-success btn-lg input-file-btn"><i class="fa fa-plus"></i> Pilih gambar</button>
-                        <button type="submit" name="submit" class="submit-file hide"></button>
-                    </form>
-                    <p>Pilih gambar daun padi yang terinfeksi untuk mengetahui jenis penyakitnya.</p>
+
+                <div class="output-buttons {% if not latest %}hide{% endif %}">
+                    <button type="button" class="btn btn-primary latest-output-btn">terbaru</button>
+                    <button type="button" class="btn btn-primary all-output-btn">semua</button>
                 </div>
-            </div>
 
-            <div class="box-output">
-                {% if file_url %}
-                    <form action="/classification" method="POST">
-                        <input type="text" name="file_path" class="hide" value="{{ file_path }}">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Nama File</th>
-                                    <th>Keterangan</th>
-                                    <th>Pilihan</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>{{ file_name }}</td>
-                                    <td>{{ prediction }}</td>
-                                    <td>
-                                        <button type="button" class="btn btn-primary btn-sm" onclick="detail()">Detail</button>
-                                        <button type="submit" name="clear" class="btn btn-secondary btn-sm">Hapus</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </form>
-                {% endif %}
-            </div>
+                <div class="box-output">
+                    <div class="latest-output-box">
+                        {% if latest %}
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Gambar</th>
+                                        <th>Status</th>
+                                        <th>Pilihan</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>{{ latest[0] }}</td>
+                                        <td>{{ latest[1] }}</td>
+                                        <td>{{ latest[2] }}</td>
+                                        <td>
+                                            <button type="button" class="btn btn-primary btn-sm detail-button" data-gambar="{{ url_for('uploaded_file', filename=latest[1]) }}" data-status="{{ latest[2] }}">Detail</button>
+                                            <form action="/delete/{{ latest[0] }}" method="post" style="display: inline;">
+                                                <button type="submit" class="btn btn-primary btn-sm">Hapus</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        {% endif %}
+                    </div>
+                    <div class="all-output-box hide">
+                        {% if items %}
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Gambar</th>
+                                        <th>Status</th>
+                                        <th>Pilihan</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in items %}
+                                        <tr>
+                                            <td>{{ item[0] }}</td>
+                                            <td>{{ item[1] }}</td>
+                                            <td>{{ item[2] }}</td>
+                                            <td>
+                                                <button type="button" class="btn btn-primary btn-sm detail-button" data-gambar="{{ url_for('uploaded_file', filename=item[1]) }}" data-status="{{ item[2] }}">Detail</button>
+                                                <form action="/delete/{{ item[0] }}" method="post" style="display: inline;">
+                                                    <button type="submit" class="btn btn-primary btn-sm">Hapus</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% endif %}
+                    </div>
+                </div>
 
-            <button id="leftButton" class="hide">Move Left</button>
+                <button id="leftButton" class="hide">Move Left</button>
+            </div>
         </div>
 
         <div class="container right">
-            {% if file_url %}
+            <div class="container-scroll">
                 <div class="display">
-                    <img src="{{ file_url }}" alt="Uploaded Image" class="img-thumbnail" style="max-width: 400px;">
-                    <h5 class="mt-4 mb-2">{{ prediction }}</h5>
+                    <img id="data-gambar" src="" alt="Uploaded Image" class="img-thumbnail" style="max-width: 400px;">
+                    <h5 id="data-status" class="mt-4 mb-2"></h5>
                 </div>
-            {% endif %}
-            <div class="description">
-                <div class="bacterial-leaf-blight hide">
-                    <p>Bacterial leaf blight adalah penyakit yang disebabkan oleh bakteri <i>Xanthomonas oryzae pv. oryzae</i>. Gejala awal biasanya berupa garis-garis berair pada daun yang kemudian menguning dan mengering, membentuk bercak-bercak coklat. Infeksi dapat menyebar dengan cepat dalam kondisi lembab dan dapat menyebabkan kerusakan parah pada hasil panen.</p>
+                <div class="description">
+                    <div class="bacterial-leaf-blight hide">
+                        <p>Bacterial leaf blight adalah penyakit yang disebabkan oleh bakteri <i>Xanthomonas oryzae pv. oryzae</i>. Gejala awal biasanya berupa garis-garis berair pada daun yang kemudian menguning dan mengering, membentuk bercak-bercak coklat. Infeksi dapat menyebar dengan cepat dalam kondisi lembab dan dapat menyebabkan kerusakan parah pada hasil panen.</p>
+                    </div>
+                    <div class="brown-spot hide">
+                        <p>Brown spot adalah penyakit yang disebabkan oleh jamur <i>Bipolaris oryzae</i>. Gejala penyakit ini adalah adanya bintik-bintik coklat pada daun, terutama pada tanaman yang lemah atau yang mengalami stres. Bintik-bintik ini biasanya berbentuk oval atau bulat dengan pusat berwarna coklat gelap dan tepi yang lebih terang. Penyakit ini dapat mengurangi kemampuan fotosintesis tanaman dan menyebabkan penurunan hasil.</p>
+                    </div>
+                    <div class="leaf-smut hide">
+                        <p>Leaf smut adalah penyakit yang disebabkan oleh jamur <i>Entyloma oryzae</i>. Gejala utama dari leaf smut adalah adanya bintik-bintik hitam kecil atau garis-garis hitam pada daun padi. Bintik-bintik ini adalah spora jamur yang dapat menyebar ke tanaman lain. Penyakit ini biasanya tidak menyebabkan kerusakan yang signifikan, tetapi dapat mengurangi estetika tanaman dan, pada kasus yang parah, dapat menurunkan hasil panen.</p>
+                    </div>
                 </div>
-                <div class="brown-spot hide">
-                    <p>Brown spot adalah penyakit yang disebabkan oleh jamur <i>Bipolaris oryzae</i>. Gejala penyakit ini adalah adanya bintik-bintik coklat pada daun, terutama pada tanaman yang lemah atau yang mengalami stres. Bintik-bintik ini biasanya berbentuk oval atau bulat dengan pusat berwarna coklat gelap dan tepi yang lebih terang. Penyakit ini dapat mengurangi kemampuan fotosintesis tanaman dan menyebabkan penurunan hasil.</p>
-                </div>
-                <div class="leaf-smut hide">
-                    <p>Leaf smut adalah penyakit yang disebabkan oleh jamur <i>Entyloma oryzae</i>. Gejala utama dari leaf smut adalah adanya bintik-bintik hitam kecil atau garis-garis hitam pada daun padi. Bintik-bintik ini adalah spora jamur yang dapat menyebar ke tanaman lain. Penyakit ini biasanya tidak menyebabkan kerusakan yang signifikan, tetapi dapat mengurangi estetika tanaman dan, pada kasus yang parah, dapat menurunkan hasil panen.</p>
-                </div>
+                
+                <button id="rightButton" class="btn btn-primary">Kembali</button>
             </div>
-            
-            <button id="rightButton" class="btn btn-primary">Kembali</button>
         </div>
     </div>
 
@@ -284,6 +329,56 @@
     </div>
 
     <script>
+        const containerLeft     = document.querySelector('.container.left')
+        const containerRight    = document.querySelector('.container.right')
+        const leftButton        = document.getElementById('leftButton')
+        const rightButton       = document.getElementById('rightButton')
+        const inputFileBtn      = document.querySelector('.box-main-input button.input-file-btn')
+        const fileInput         = document.querySelector('.box-main-input input[name="file"].input-file')
+        const submitButton      = document.querySelector('.box-main-input button[name="submit"].submit-file')
+        const detailButtons     = document.querySelectorAll('.detail-button');
+        const latestOutputBtn   = document.querySelector('.latest-output-btn');
+        const latestOutputBox   = document.querySelector('.latest-output-box');
+        const allOutputBtn      = document.querySelector('.all-output-btn');
+        const allOutputBox      = document.querySelector('.all-output-box');
+        const blb               = document.querySelector('.bacterial-leaf-blight');
+        const bs                = document.querySelector('.brown-spot');
+        const ls                = document.querySelector('.leaf-smut');
+
+
+        // Mengambil semua tombol dengan kelas detail-button
+        detailButtons.forEach(function(detailBtn) {
+            detailBtn.addEventListener('click', function() {
+                let gambar = detailBtn.getAttribute('data-gambar');
+                let status = detailBtn.getAttribute('data-status');
+
+                if (gambar && status) {
+                    document.querySelector('#data-gambar').setAttribute('src', gambar);
+                    document.querySelector('#data-status').textContent = "Status: " + status;
+
+                    if (status == "Bacterial leaf blight") {
+                        blb.classList.remove('hide');
+                        bs.classList.add('hide');
+                        ls.classList.add('hide');
+                    } else if (status == "Brown spot") {
+                        blb.classList.add('hide');
+                        bs.classList.remove('hide');
+                        ls.classList.add('hide');
+                    } else if (status == "Leaf smut") {
+                        blb.classList.add('hide');
+                        bs.classList.add('hide');
+                        ls.classList.remove('hide');
+                    } else {
+                        document.querySelector('.container.right .description').innerHTML = '<h2 class="mt-4 mb-4">Penyakit Tidak Diketahui</h2>';
+                    }
+
+                    setTimeout(function() {
+                        leftButton.click();
+                    }, 500)
+                }
+            });
+        });
+
         // Update progress bar
         function updateProgress() {
             fetch('/progress')
@@ -297,17 +392,9 @@
         }
 
 
-        const containerLeft     = document.querySelector('.container.left')
-        const containerRight    = document.querySelector('.container.right')
-        const leftButton        = document.getElementById('leftButton')
-        const rightButton       = document.getElementById('rightButton')
-        const inputFileBtn      = document.querySelector('.box-main-input button.input-file-btn')
-        const fileInput         = document.querySelector('.box-main-input input[name="file"].input-file')
-        const submitButton      = document.querySelector('.box-main-input button[name="submit"].submit-file')
-
-
         // Geser halaman ke kiri
         leftButton.addEventListener('click', function() {
+            containerRight.scrollTop = 0;
             containerLeft.style.transform = 'translateX(-200%)';
             containerRight.style.right = '50%';
             containerRight.style.transform = 'translateX(50%)';
@@ -341,40 +428,19 @@
             document.querySelector('.container-loading').style.display = 'flex';
             updateProgress();
         });
+        
 
-
-
-
-        const blb   = document.querySelector('.bacterial-leaf-blight');
-        const bs    = document.querySelector('.brown-spot');
-        const ls    = document.querySelector('.leaf-smut');
-
-        // Tampilkan deskripsi penyakit
-        document.addEventListener("DOMContentLoaded", function() {
-            {% if file_url %}
-                {% if prediction == 'Bacterial leaf blight' %}
-                    blb.classList.remove('hide');
-                    bs.classList.add('hide');
-                    ls.classList.add('hide');
-                {% elif prediction == 'Brown spot' %}
-                    blb.classList.add('hide');
-                    bs.classList.remove('hide');
-                    ls.classList.add('hide');
-                {% elif prediction == 'Leaf smut' %}
-                    blb.classList.add('hide');
-                    bs.classList.add('hide');
-                    ls.classList.remove('hide');
-                {% endif %}
-            {% endif %}
+        // Menampilkan output terakhir
+        latestOutputBtn.addEventListener("click", function() {
+            allOutputBox.classList.add('hide');
+            latestOutputBox.classList.remove('hide');
         });
 
-
-
-
-        // Fungsi tambahan
-        function detail() {
-            leftButton.click();
-        }
+        // Menampilkan semua output
+        allOutputBtn.addEventListener("click", function() {
+            latestOutputBox.classList.add('hide');
+            allOutputBox.classList.remove('hide');
+        });
 
 
         
