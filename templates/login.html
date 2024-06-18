@@ -68,34 +68,38 @@
             text-align: center;
             transition: all 0.8s ease; 
         }
-        
-
-        .hide {
-            display: none;
-        }
-
     </style>
 
 </head>
 <body>
     <div class="container-fluid">
         <div class="container">
-            <h1>Rice Leaf Diseases</h1>
-            <h5 class="mb-3 {% if not username %}hide{% endif %}">Selamat datang, {{ username }}, id Anda {{ id_pengguna }}</h5>
-            <div class="options">
-                <a href="{{ url_for('training_model') }}" {% if not username %}onclick="alertLogin(event)"{% endif %} class="btn btn-dark">Start Now</a>
-                <a href="{{ url_for('login') }}" class="btn btn-dark {% if username %}hide{% endif %}">Login</a>
-                <a href="{{ url_for('logout') }}" class="btn btn-dark {% if not username %}hide{% endif %}">Logout</a>
-            </div>
+            <h2>Login</h2>
+            <form method="post" action="{{ url_for('login') }}">
+                <label for="username">Username:</label><br>
+                <input type="text" id="username" name="username" required><br>
+                <label for="password">Password:</label><br>
+                <input type="password" id="password" name="password" required><br><br>
+                <input type="submit" name="login" value="Login">
+            </form>
+            
+            <h2>Daftar</h2>
+            <form method="post" action="{{ url_for('login') }}">
+                <label for="new_username">Username:</label><br>
+                <input type="text" id="new_username" name="new_username" required><br>
+                <label for="new_password">Password:</label><br>
+                <input type="password" id="new_password" name="new_password" required><br><br>
+                <input type="submit" name="register" value="Daftar">
+            </form>
         </div>
     </div>
 
     <script>
-        function alertLogin(event) {
-            event.preventDefault();
-            alert('Anda harus login terlebih dahulu!');
-        }
-        
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                alert('{{ messages[0] }}');
+            {% endif %}
+        {% endwith %}
     </script>
 </body>
 </html>

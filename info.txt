@@ -1,5 +1,6 @@
 Library silahkan install sendiri di terminal atau command prompt
 Kode instalasi: 
 - pip install opencv-python-headless numpy scikit-image scikit-learn
+- pip install Flask mysql-connector-python bcrypt
 - pip install Flask-Uploads
 

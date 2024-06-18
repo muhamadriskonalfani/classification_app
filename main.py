@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory, session, flash
 import mysql.connector
 from werkzeug.utils import secure_filename
 import os
@@ -7,9 +7,12 @@ import numpy as np
 from skimage.feature import hog
 from sklearn import svm
 from sklearn.model_selection import train_test_split
+from datetime import datetime
 import time
+import bcrypt
 
 app = Flask(__name__)
+app.secret_key = os.urandom(24)
 
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
@@ -20,7 +23,9 @@ file_name = ''
 file_path = ''
 prediction = ''
 model = ''
-progress = 0  # Menyimpan progress
+progress = 0 
+id_pengguna = ''
+username = ''
 
 # Konfigurasi koneksi database MySQL
 db = mysql.connector.connect(
@@ -33,7 +38,96 @@ db = mysql.connector.connect(
 # Route untuk halaman utama/index
 @app.route('/')
 def index():
-    return render_template('index.html')
+    global id_pengguna, username
+    
+    if 'id_pengguna' in session and 'username' in session:
+        id_pengguna = session['id_pengguna']
+        username = session['username']
+        
+    return render_template('index.html', id_pengguna=id_pengguna, username=username)
+
+
+def hash_password(password):
+    # Generate salt dan hash password menggunakan bcrypt
+    salt = bcrypt.gensalt()
+    hashed_password = bcrypt.hashpw(password.encode(), salt)
+    return hashed_password
+
+def verify_password(stored_password, provided_password):
+    # Verifikasi password menggunakan bcrypt
+    return bcrypt.checkpw(provided_password.encode(), stored_password)
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        if 'login' in request.form:
+            username = request.form['username']
+            password = request.form['password']
+
+            # Koneksi ke database
+            cursor = db.cursor()
+
+            # Eksekusi query
+            query = "SELECT * FROM tb_pengguna WHERE username = %s"
+            cursor.execute(query, (username,))
+            user = cursor.fetchone()
+
+            if user:
+                stored_password = user[2].encode('utf-8')  # Kolom kedua adalah password di database, encode ke byte-like object
+                if verify_password(stored_password, password):
+                    # Simpan informasi pengguna ke dalam session
+                    session['id_pengguna'] = user[0]  # Mengambil id_pengguna dari database
+                    session['username'] = user[1]  # Mengambil username dari database
+                    return redirect(url_for('index'))
+                else:
+                    flash('Password salah.')
+                    return redirect(url_for('login'))
+            else:
+                flash('Username tidak terdaftar.')
+                return redirect(url_for('login'))
+
+            cursor.close()
+        
+        elif 'register' in request.form:
+            new_username = request.form['new_username']
+            new_password = request.form['new_password']
+
+            # Hash password menggunakan bcrypt
+            hashed_password = hash_password(new_password)
+
+            # Koneksi ke database
+            cursor = db.cursor()
+            
+            try:
+                # Eksekusi query untuk menambahkan pengguna baru
+                query = "INSERT INTO tb_pengguna (username, password) VALUES (%s, %s)"
+                cursor.execute(query, (new_username, hashed_password))  # Tidak perlu decode kembali ke string sebelum disimpan
+                db.commit()
+                flash('Registrasi berhasil. Silakan login.')
+            except mysql.connector.Error as err:
+                flash('Registrasi gagal. Username sudah digunakan.')
+                db.rollback()
+            finally:
+                cursor.close()
+
+            return redirect(url_for('login'))
+
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    global id_pengguna, username
+    
+    # Hapus semua variabel sesi yang terkait dengan pengguna
+    session.pop('id_pengguna', None)
+    session.pop('username', None)
+    
+    # Hapus nilai dari variabel global
+    id_pengguna = ''
+    username = ''
+    
+    return redirect(url_for('index'))
+
 
 # Route untuk halaman utama/index
 @app.route('/training_model')
@@ -43,18 +137,23 @@ def training_model():
 # Route untuk halaman klasifikasi
 @app.route('/classification', methods=['GET', 'POST'])
 def classification():
-    global progress
+    global id_pengguna, username, progress
     
     progress = 0  # Set progress kembali ke 0
     cursor = db.cursor()
-    cursor.execute("SELECT * FROM tb_gambar ORDER BY id_gambar DESC")
+    cursor.execute("SELECT * FROM tb_gambar WHERE id_pengguna = %s ORDER BY id_gambar DESC", (id_pengguna,))
     items = cursor.fetchall()
     
-    cursor.execute("SELECT * FROM tb_gambar ORDER BY id_gambar DESC LIMIT 1")
+    cursor.execute("SELECT * FROM tb_gambar WHERE id_pengguna = %s ORDER BY id_gambar DESC LIMIT 1", (id_pengguna,))
     latest = cursor.fetchone()
     
-    return render_template('classification.html', items=items, latest=latest)
+    return render_template('classification.html', id_pengguna=id_pengguna, username=username, items=items, latest=latest)
 
+
+def generate_unique_filename(file_name, user_id):
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    name, extension = os.path.splitext(file_name)
+    return f"{name}_{user_id}{timestamp}{extension}"
 
 # Route untuk menambah item
 @app.route('/add_to_database', methods=['GET', 'POST'])
@@ -63,32 +162,55 @@ def add_to_database():
     
     if request.method == 'POST':
         if 'submit' in request.form:
+            user_id = request.form['id_pengguna']
             file = request.files.get('file')
             if file:
                 file_name = file.filename
-                file_path = os.path.join(app.config['UPLOAD_FOLDER'], file_name)
+                unique_name = generate_unique_filename(file_name, user_id)
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
                 file.save(file_path)
-                file_url = url_for('static', filename=f'uploads/{file_name}')
+                file_url = url_for('static', filename=f'uploads/{unique_name}')
                 klasifikasi_gambar_baru() 
     
+    # Koneksi ke database
     cursor = db.cursor()
-    cursor.execute("INSERT INTO tb_gambar (gambar, status) VALUES (%s, %s)", (file_name, prediction))
-    db.commit()
     
-    return redirect('/classification')
+    try:
+        cursor.execute("INSERT INTO tb_gambar (id_pengguna, nama_unik_gambar, nama_gambar, status) VALUES (%s, %s, %s, %s)", (user_id, unique_name, file_name, prediction))
+        db.commit()
+    except mysql.connector.Error as err:
+        flash(f"Error: {err}", 'error')
+        db.rollback()
+    finally:
+        cursor.close()
+    
+    return redirect(url_for('classification'))
 
 # Route untuk menghapus item
-@app.route('/delete/<int:item_id>', methods=['POST'])
-def delete_from_database(item_id):
+@app.route('/delete/<int:id_gambar>/<int:id_pengguna>', methods=['POST'])
+def delete_from_database(id_gambar, id_pengguna):
     cursor = db.cursor()
-    cursor.execute("SELECT gambar FROM tb_gambar WHERE id_gambar = %s", (item_id,))
-    image = cursor.fetchone()[0]
-    if image:
-        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], image))
-    cursor.execute("DELETE FROM tb_gambar WHERE id_gambar = %s", (item_id,))
-    db.commit()
     
-    return redirect('/classification')
+    try:
+        cursor.execute("SELECT nama_unik_gambar FROM tb_gambar WHERE id_gambar = %s AND id_pengguna = %s", (id_gambar, id_pengguna))
+        image = cursor.fetchone()
+        
+        if image:
+            image_filename = image[0]
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], image_filename)
+            
+            if os.path.exists(image_path):
+                os.remove(image_path) 
+        
+        cursor.execute("DELETE FROM tb_gambar WHERE id_gambar = %s AND id_pengguna = %s", (id_gambar, id_pengguna))
+        db.commit() 
+    except mysql.connector.Error as err:
+        flash(f"Error: {err}", 'error')
+        db.rollback()
+    finally:
+        cursor.close()
+    
+    return redirect(url_for('classification'))
 
 
 # Endpoint untuk melayani file statis

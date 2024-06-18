@@ -87,7 +87,7 @@
                                  'input';
             grid-template-rows: 1fr 3.5fr;
             padding: 2rem;
-            gap: 2rem;
+            gap: 1.5rem;
         
             /* border: 1px solid red; */
         }
@@ -218,9 +218,11 @@
                 <div class="box-input">
                     <div class="box-header">
                         <h2 class="text-secondary">Rice Leaf Diseases</h2>
+                        <a href="{{ url_for('index') }}" onclick="backHome(event)" class="btn btn-primary">Beranda</a>
                     </div>
                     <div class="box-main-input">
                         <form action="/add_to_database" method="POST" enctype="multipart/form-data">
+                            <input type="text" name="id_pengguna" class="hide" value="{{ id_pengguna }}">
                             <input type="file" name="file" class="input-file hide">
                             <button class="btn btn-primary btn-lg input-file-btn"><i class="fa fa-plus"></i> Pilih gambar</button>
                             <button type="submit" name="submit" class="submit-file hide"></button>
@@ -249,11 +251,11 @@
                                 <tbody>
                                     <tr>
                                         <td>{{ latest[0] }}</td>
-                                        <td>{{ latest[1] }}</td>
-                                        <td>{{ latest[2] }}</td>
+                                        <td>{{ latest[3] }}</td>
+                                        <td>{{ latest[4] }}</td>
                                         <td>
-                                            <button type="button" class="btn btn-primary btn-sm detail-button" data-gambar="{{ url_for('uploaded_file', filename=latest[1]) }}" data-status="{{ latest[2] }}">Detail</button>
-                                            <form action="/delete/{{ latest[0] }}" method="post" style="display: inline;">
+                                            <button type="button" class="btn btn-primary btn-sm detail-button" data-gambar="{{ url_for('uploaded_file', filename=latest[2]) }}" data-status="{{ latest[4] }}">Detail</button>
+                                            <form action="/delete/{{ latest[0] }}/{{ latest[1] }}" method="post" style="display: inline;">
                                                 <button type="submit" class="btn btn-primary btn-sm">Hapus</button>
                                             </form>
                                         </td>
@@ -277,11 +279,11 @@
                                     {% for item in items %}
                                         <tr>
                                             <td>{{ item[0] }}</td>
-                                            <td>{{ item[1] }}</td>
-                                            <td>{{ item[2] }}</td>
+                                            <td>{{ item[3] }}</td>
+                                            <td>{{ item[4] }}</td>
                                             <td>
-                                                <button type="button" class="btn btn-primary btn-sm detail-button" data-gambar="{{ url_for('uploaded_file', filename=item[1]) }}" data-status="{{ item[2] }}">Detail</button>
-                                                <form action="/delete/{{ item[0] }}" method="post" style="display: inline;">
+                                                <button type="button" class="btn btn-primary btn-sm detail-button" data-gambar="{{ url_for('uploaded_file', filename=item[2]) }}" data-status="{{ item[4] }}">Detail</button>
+                                                <form action="/delete/{{ item[0] }}/{{ item[1] }}" method="post" style="display: inline;">
                                                     <button type="submit" class="btn btn-primary btn-sm">Hapus</button>
                                                 </form>
                                             </td>
@@ -327,6 +329,14 @@
         </div>
         <h2 class="step-process text-secondary mt-4">Membuat Model Klasifikasi</h2>
     </div>
+
+    <script>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                alert('{{ messages[0] }}');
+            {% endif %}
+        {% endwith %}
+    </script>
 
     <script>
         const containerLeft     = document.querySelector('.container.left')
@@ -441,6 +451,17 @@
             latestOutputBox.classList.add('hide');
             allOutputBox.classList.remove('hide');
         });
+
+
+        // Fungsi konfirmasi untuk kembali ke Beranda
+        function backHome(event) {
+            event.preventDefault();
+            let userConfirmed = confirm('Tindakan ini akan menghapus model klasifikasi');
+            if (userConfirmed) {
+                window.location.href = "{{ url_for('index') }}";
+            }
+        }
+        
 
 
         
