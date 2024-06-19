@@ -15,11 +15,8 @@
         @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap');
 
         :root {
-            --white: #fff;
-            --grey1: #666;
-            --grey2: #444;
-            --grey3: #222;
-            --bg-light: #f8f9fa;
+            --white: #ffffff;
+            --black: #1a1a1a;
             
             --border: 1px solid black;
             /* --border: none; */
@@ -60,6 +57,7 @@
             position: absolute;
             height: 100vh;
             padding: 20px;
+            padding-top: 0;
             text-align: center;
             overflow: scroll;
             transition: all 0.8s ease; 
@@ -167,7 +165,7 @@
             width: 5rem;
             height: 5rem;
             transform: rotate(45deg);
-            background: white;
+            background: #f8f9fa;
             right: -3rem;
         }
 
@@ -175,7 +173,7 @@
             content: '';
             position: absolute;
             inset: 1rem;
-            background: white;
+            background: #f8f9fa;
             border-radius: 50%;
         }
 
@@ -193,11 +191,24 @@
             font-size: 25px;
             display: flex;
             justify-content: center;
-            align-items: center;
-            background: white;
+            align-items: center; 
         }
 
 
+
+        .btn-light {
+            background: var(--white);
+            color: var(--black);
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: .1s ease-in;
+        }
+
+        .btn-light:hover {
+            background: var(--white);
+            color: var(--black);
+            transform: translateY(2px);
+        }
 
         h2, h5 {
             margin: 0;
@@ -212,19 +223,19 @@
 
 </head>
 <body>
-    <div class="container-fluid">
+    <div class="container-fluid bg-light">
         <div class="container left">
             <div class="container-scroll">
                 <div class="box-input">
                     <div class="box-header">
                         <h2 class="text-secondary">Rice Leaf Diseases</h2>
-                        <a href="{{ url_for('index') }}" onclick="backHome(event)" class="btn btn-primary">Beranda</a>
+                        <a href="{{ url_for('index') }}" onclick="backHome(event)" class="btn btn-light">Beranda</a>
                     </div>
                     <div class="box-main-input">
                         <form action="/add_to_database" method="POST" enctype="multipart/form-data">
                             <input type="text" name="id_pengguna" class="hide" value="{{ id_pengguna }}">
                             <input type="file" name="file" class="input-file hide">
-                            <button class="btn btn-primary btn-lg input-file-btn"><i class="fa fa-plus"></i> Pilih gambar</button>
+                            <button class="btn btn-light btn-lg input-file-btn"><i class="fa fa-plus text-secondary"></i> Pilih gambar</button>
                             <button type="submit" name="submit" class="submit-file hide"></button>
                         </form>
                         <p>Pilih gambar daun padi yang terinfeksi untuk mengetahui jenis penyakitnya.</p>
@@ -232,8 +243,8 @@
                 </div>
 
                 <div class="output-buttons {% if not latest %}hide{% endif %}">
-                    <button type="button" class="btn btn-primary latest-output-btn">terbaru</button>
-                    <button type="button" class="btn btn-primary all-output-btn">semua</button>
+                    <button type="button" class="btn btn-light latest-output-btn">terbaru</button>
+                    <button type="button" class="btn btn-light all-output-btn">semua</button>
                 </div>
 
                 <div class="box-output">
@@ -242,7 +253,7 @@
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th>No</th>
+                                        <th>Id</th>
                                         <th>Gambar</th>
                                         <th>Status</th>
                                         <th>Pilihan</th>
@@ -254,9 +265,9 @@
                                         <td>{{ latest[3] }}</td>
                                         <td>{{ latest[4] }}</td>
                                         <td>
-                                            <button type="button" class="btn btn-primary btn-sm detail-button" data-gambar="{{ url_for('uploaded_file', filename=latest[2]) }}" data-status="{{ latest[4] }}">Detail</button>
+                                            <button type="button" class="btn btn-light btn-sm detail-button" data-gambar="{{ url_for('uploaded_file', filename=latest[2]) }}" data-status="{{ latest[4] }}">Detail</button>
                                             <form action="/delete/{{ latest[0] }}/{{ latest[1] }}" method="post" style="display: inline;">
-                                                <button type="submit" class="btn btn-primary btn-sm">Hapus</button>
+                                                <button type="submit" class="btn btn-light btn-sm">Hapus</button>
                                             </form>
                                         </td>
                                     </tr>
@@ -269,7 +280,7 @@
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th>No</th>
+                                        <th>Id</th>
                                         <th>Gambar</th>
                                         <th>Status</th>
                                         <th>Pilihan</th>
@@ -282,9 +293,9 @@
                                             <td>{{ item[3] }}</td>
                                             <td>{{ item[4] }}</td>
                                             <td>
-                                                <button type="button" class="btn btn-primary btn-sm detail-button" data-gambar="{{ url_for('uploaded_file', filename=item[2]) }}" data-status="{{ item[4] }}">Detail</button>
+                                                <button type="button" class="btn btn-light btn-sm detail-button" data-gambar="{{ url_for('uploaded_file', filename=item[2]) }}" data-status="{{ item[4] }}">Detail</button>
                                                 <form action="/delete/{{ item[0] }}/{{ item[1] }}" method="post" style="display: inline;">
-                                                    <button type="submit" class="btn btn-primary btn-sm">Hapus</button>
+                                                    <button type="submit" class="btn btn-light btn-sm">Hapus</button>
                                                 </form>
                                             </td>
                                         </tr>
@@ -317,12 +328,12 @@
                     </div>
                 </div>
                 
-                <button id="rightButton" class="btn btn-primary">Kembali</button>
+                <button id="rightButton" class="btn btn-light">Kembali</button>
             </div>
         </div>
     </div>
 
-    <div class="container-loading" style="display: none;">
+    <div class="container-loading bg-light" style="display: none;">
         <div class="spinner-container">
             <div class="spinner"></div>
             <div id="progress-percentage">0%</div>

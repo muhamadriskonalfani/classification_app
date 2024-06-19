@@ -15,11 +15,8 @@
         @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap');
 
         :root {
-            --white: #fff;
-            --grey1: #666;
-            --grey2: #444;
-            --grey3: #222;
-            --bg-light: #f8f9fa;
+            --white: #ffffff;
+            --black: #1a1a1a;
             
             --border: 1px solid black;
             /* --border: none; */
@@ -70,6 +67,7 @@
         }
         
 
+
         .hide {
             display: none;
         }
@@ -78,10 +76,10 @@
 
 </head>
 <body>
-    <div class="container-fluid">
+    <div class="container-fluid bg-light">
         <div class="container">
             <h1>Rice Leaf Diseases</h1>
-            <h5 class="mb-3 {% if not username %}hide{% endif %}">Selamat datang, {{ username }}, id Anda {{ id_pengguna }}</h5>
+            <h4 class="mb-3 {% if not username %}hide{% endif %}">Selamat datang, {{ username }}</h4>
             <div class="options">
                 <a href="{{ url_for('training_model') }}" {% if not username %}onclick="alertLogin(event)"{% endif %} class="btn btn-dark">Start Now</a>
                 <a href="{{ url_for('login') }}" class="btn btn-dark {% if username %}hide{% endif %}">Login</a>
