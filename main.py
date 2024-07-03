@@ -8,6 +8,7 @@ from skimage.feature import hog
 from sklearn import svm
 from sklearn.model_selection import train_test_split
 from datetime import datetime
+from PIL import Image
 import time
 import bcrypt
 
@@ -22,10 +23,13 @@ file_url = ''
 file_name = ''
 file_path = ''
 prediction = ''
+file_resolution = ''
 model = ''
 progress = 0 
 id_pengguna = ''
 username = ''
+status_model = False
+is_uploaded = False
 
 # Konfigurasi koneksi database MySQL
 db = mysql.connector.connect(
@@ -116,7 +120,7 @@ def login():
 
 @app.route('/logout')
 def logout():
-    global id_pengguna, username
+    global id_pengguna, username, is_uploaded
     
     # Hapus semua variabel sesi yang terkait dengan pengguna
     session.pop('id_pengguna', None)
@@ -125,6 +129,7 @@ def logout():
     # Hapus nilai dari variabel global
     id_pengguna = ''
     username = ''
+    is_uploaded = False
     
     return redirect(url_for('index'))
 
@@ -132,22 +137,30 @@ def logout():
 # Route untuk halaman utama/index
 @app.route('/training_model')
 def training_model():
-    return render_template('training_model.html')
+    global status_model
+    return render_template('training_model.html', status_model=status_model)
 
 # Route untuk halaman klasifikasi
 @app.route('/classification', methods=['GET', 'POST'])
 def classification():
-    global id_pengguna, username, progress
+    global id_pengguna, username, status_model, is_uploaded, progress
     
     progress = 0  # Set progress kembali ke 0
     cursor = db.cursor()
     cursor.execute("SELECT * FROM tb_gambar WHERE id_pengguna = %s ORDER BY id_gambar DESC", (id_pengguna,))
-    items = cursor.fetchall()
+    items = cursor.fetchall() 
     
-    cursor.execute("SELECT * FROM tb_gambar WHERE id_pengguna = %s ORDER BY id_gambar DESC LIMIT 1", (id_pengguna,))
-    latest = cursor.fetchone()
-    
-    return render_template('classification.html', id_pengguna=id_pengguna, username=username, items=items, latest=latest)
+    return render_template('classification.html', id_pengguna=id_pengguna, username=username, status_model=status_model, is_uploaded=is_uploaded, items=items)
+
+# Route untuk halaman bantuan
+@app.route('/bantuan')
+def bantuan():
+    return render_template('bantuan.html')
+
+# Route untuk halaman histori
+@app.route('/histori')
+def histori():
+    return render_template('histori.html')
 
 
 def generate_unique_filename(file_name, user_id):
@@ -158,7 +171,7 @@ def generate_unique_filename(file_name, user_id):
 # Route untuk menambah item
 @app.route('/add_to_database', methods=['GET', 'POST'])
 def add_to_database():
-    global file_url, file_name, file_path, prediction
+    global file_url, file_name, file_path, prediction, file_resolution, is_uploaded
     
     if request.method == 'POST':
         if 'submit' in request.form:
@@ -170,14 +183,18 @@ def add_to_database():
                 file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
                 file.save(file_path)
                 file_url = url_for('static', filename=f'uploads/{unique_name}')
+                img = Image.open(file)
+                width, height = img.size
+                file_resolution = f'{width}x{height}'
                 klasifikasi_gambar_baru() 
     
     # Koneksi ke database
     cursor = db.cursor()
     
     try:
-        cursor.execute("INSERT INTO tb_gambar (id_pengguna, nama_unik_gambar, nama_gambar, status) VALUES (%s, %s, %s, %s)", (user_id, unique_name, file_name, prediction))
+        cursor.execute("INSERT INTO tb_gambar (id_pengguna, nama_unik_gambar, nama_gambar, status, resolusi) VALUES (%s, %s, %s, %s, %s)", (user_id, unique_name, file_name, prediction, file_resolution))
         db.commit()
+        is_uploaded = True
     except mysql.connector.Error as err:
         flash(f"Error: {err}", 'error')
         db.rollback()
@@ -211,6 +228,33 @@ def delete_from_database(id_gambar, id_pengguna):
         cursor.close()
     
     return redirect(url_for('classification'))
+
+# Route untuk menghapus semua item
+@app.route('/delete_all_images/<int:id_pengguna>', methods=['POST'])
+def delete_all_images(id_pengguna):
+    cursor = db.cursor()
+    
+    try:
+        cursor.execute("SELECT nama_unik_gambar FROM tb_gambar WHERE id_pengguna = %s", (id_pengguna,))
+        images = cursor.fetchall()
+        
+        for image in images:
+            if image:
+                image_filename = image[0]
+                image_path = os.path.join(app.config['UPLOAD_FOLDER'], image_filename)
+                
+                if os.path.exists(image_path):
+                    os.remove(image_path) 
+        
+        cursor.execute("DELETE FROM tb_gambar WHERE id_pengguna = %s", (id_pengguna,))
+        db.commit() 
+    except mysql.connector.Error as err:
+        flash(f"Error: {err}", 'error')
+        db.rollback()
+    finally:
+        cursor.close()
+    
+    return redirect(url_for('to_first_page'))
 
 
 # Endpoint untuk melayani file statis
@@ -271,46 +315,56 @@ def progress_status():
     global progress
     return jsonify({'progress': progress})
 
+@app.route('/to_first_page')
+def to_first_page(): 
+    global is_uploaded
+    is_uploaded = False
+    return redirect(url_for('classification'))
+
 @app.route('/latih_model_klasifikasi')
 def latih_model_klasifikasi():
-    global model
+    global model, status_model
     
-    update_progress(0, 1)  # Start progress
-    loop_update_progress(1, 14) # Update progress
-    
-    # Langkah 1: Memuat dataset dari folder lokal
-    folder_path = './rice_leaf_diseases'
-    images, labels = load_images_from_folder(folder_path)
-    loop_update_progress(15, 27) # Update progress
+    if model:
+        status_model = True
+        return jsonify({'status_model': status_model})
+    else:
+        update_progress(0, 1)  # Start progress
+        loop_update_progress(1, 14) # Update progress
+        
+        # Langkah 1: Memuat dataset dari folder lokal
+        folder_path = './rice_leaf_diseases'
+        images, labels = load_images_from_folder(folder_path)
+        loop_update_progress(15, 27) # Update progress
 
-    # Langkah 2: Pra-pemrosesan setiap gambar
-    preprocessed_images = [preprocess_image(cv2.resize(image, (384, 128))) for image in images]
-    loop_update_progress(28, 37) # Update progress
+        # Langkah 2: Pra-pemrosesan setiap gambar
+        preprocessed_images = [preprocess_image(cv2.resize(image, (384, 128))) for image in images]
+        loop_update_progress(28, 37) # Update progress
 
-    # Langkah 3: Ekstraksi fitur HOG untuk setiap gambar yang sudah dipra-pemrosesan
-    features = [extract_hog_features(image) for image in preprocessed_images]
-    loop_update_progress(48, 60) # Update progress
+        # Langkah 3: Ekstraksi fitur HOG untuk setiap gambar yang sudah dipra-pemrosesan
+        features = [extract_hog_features(image) for image in preprocessed_images]
+        loop_update_progress(48, 60) # Update progress
 
-    # Langkah 4: Menyatukan fitur HOG menjadi satu array homogen
-    X = np.array(features)
-    y = np.array(labels)
-    loop_update_progress(61, 73) # Update progress
+        # Langkah 4: Menyatukan fitur HOG menjadi satu array homogen
+        X = np.array(features)
+        y = np.array(labels)
+        loop_update_progress(61, 73) # Update progress
 
-    # Langkah 5: Membagi dataset menjadi training dan testing set
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6, random_state=42)
-    loop_update_progress(74, 86) # Update progress
+        # Langkah 5: Membagi dataset menjadi training dan testing set
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6, random_state=42)
+        loop_update_progress(74, 86) # Update progress
 
-    # Langkah 6: Inisialisasi model SVM
-    model = svm.SVC(kernel='linear')
-    loop_update_progress(87, 99) # Update progress
+        # Langkah 6: Inisialisasi model SVM
+        model = svm.SVC(kernel='linear')
+        loop_update_progress(87, 99) # Update progress
 
-    # Langkah 7: Melatih model SVM
-    model.fit(X_train, y_train)
-    update_progress(100, 1)  # Update progress
-    update_progress(101, 1)  # Stop progress
-    
-    hasil_model = 'Aktif'
-    return jsonify({'hasil_model': hasil_model})
+        # Langkah 7: Melatih model SVM
+        model.fit(X_train, y_train)
+        update_progress(100, 1)  # Update progress
+        update_progress(101, 1)  # Stop progress
+        
+        status_model = True
+        return jsonify({'status_model': status_model})
 
 def klasifikasi_gambar_baru():
     global file_path, prediction

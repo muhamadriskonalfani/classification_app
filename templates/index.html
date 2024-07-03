@@ -31,24 +31,23 @@
         }
         
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
+            color: var(--white);
+            background-image: url("{{ url_for('static', filename='assets/bg.png') }}");
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
         
             /* border: var(--border); */
         }
         
         .container-fluid {
             position: relative;
-            width: 100%;
-            height: 100%;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
-            overflow: scroll;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
         
             /* border: var(--border); */
         }
@@ -60,30 +59,39 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             padding: 20px;
-            text-align: center;
+            text-align: left;
             transition: all 0.8s ease; 
         }
-        
+
+        p.teks {
+            width: 30rem;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+        }
 
 
         .hide {
             display: none;
         }
+        
 
     </style>
 
 </head>
 <body>
-    <div class="container-fluid bg-light">
+    <div class="container-fluid">
         <div class="container">
             <h1>Rice Leaf Diseases</h1>
+            <p class="teks">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quisquam possimus nam reprehenderit omnis, dolorem est doloremque quas ducimus ex fuga?</p>
             <h4 class="mb-3 {% if not username %}hide{% endif %}">Selamat datang, {{ username }}</h4>
             <div class="options">
-                <a href="{{ url_for('training_model') }}" {% if not username %}onclick="alertLogin(event)"{% endif %} class="btn btn-dark">Start Now</a>
-                <a href="{{ url_for('login') }}" class="btn btn-dark {% if username %}hide{% endif %}">Login</a>
-                <a href="{{ url_for('logout') }}" class="btn btn-dark {% if not username %}hide{% endif %}">Logout</a>
+                <a href="{{ url_for('training_model') }}" {% if not username %}onclick="alertLogin(event)"{% endif %} class="btn btn-outline-light">Start Now</a>
+                <a href="{{ url_for('login') }}" class="btn btn-outline-light {% if username %}hide{% endif %}">Login</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-light {% if not username %}hide{% endif %}">Logout</a>
             </div>
         </div>
     </div>

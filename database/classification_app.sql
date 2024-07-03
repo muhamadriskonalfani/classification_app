@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 18 Jun 2024 pada 14.00
+-- Waktu pembuatan: 01 Jul 2024 pada 13.34
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -32,7 +32,8 @@ CREATE TABLE `tb_gambar` (
   `id_pengguna` varchar(255) NOT NULL,
   `nama_unik_gambar` varchar(255) NOT NULL,
   `nama_gambar` varchar(255) NOT NULL,
-  `status` varchar(255) NOT NULL
+  `status` varchar(255) NOT NULL,
+  `resolusi` varchar(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -63,7 +64,8 @@ INSERT INTO `tb_pengguna` (`id_pengguna`, `username`, `password`) VALUES
 -- Indeks untuk tabel `tb_gambar`
 --
 ALTER TABLE `tb_gambar`
-  ADD PRIMARY KEY (`id_gambar`);
+  ADD PRIMARY KEY (`id_gambar`),
+  ADD UNIQUE KEY `nama_unik_gambar` (`nama_unik_gambar`);
 
 --
 -- Indeks untuk tabel `tb_pengguna`
@@ -80,7 +82,7 @@ ALTER TABLE `tb_pengguna`
 -- AUTO_INCREMENT untuk tabel `tb_gambar`
 --
 ALTER TABLE `tb_gambar`
-  MODIFY `id_gambar` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
+  MODIFY `id_gambar` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_pengguna`
