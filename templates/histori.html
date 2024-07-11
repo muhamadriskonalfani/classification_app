@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klasifikasi</title>
+
+    <!-- bootstrap 5 link -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- font awesome cdn link -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap'); 
+
+        :root {
+            --white: #ffffff;
+            --black: #1a1a1a;
+            
+            --border: 1px solid black;
+            /* --border: none; */
+        }
+        
+        * {
+            font-family: "Montserrat", sans-serif;
+        }
+        
+        *::-webkit-scrollbar {
+            display: none;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container-fluid {
+            position: relative; 
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            width: 100vw;
+            height: 100vh;
+            padding: 0;
+        }
+
+
+
+        .header {
+            position: fixed;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100vw;
+            height: 4.5rem;
+            padding: 0 7rem;
+            background: var(--white); 
+            border-bottom: .5px solid lightgray;
+            z-index: 9999;
+        }
+
+        .header .logo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 3rem;
+            gap: .5rem;
+        }
+
+        .header .logo img {
+            height: 100%;
+        }
+
+        .header .logo h2 {
+            margin: 0;
+        }
+
+        .header .links .nav {
+            display: flex;
+            gap: 1rem; 
+        }
+        
+        .header .links .nav .nav-link {
+            display: flex;
+            align-items: center; 
+            transition: .2s ease; 
+        }
+
+        .header .links .dropdown-menu .dropdown-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-width: 15rem;
+            cursor: pointer;
+        }
+        
+        .header .login button {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, .2);
+            transition: .2s ease;
+        }
+        
+        .header .links .nav .nav-link:hover, 
+        .header .login button:hover {
+            transform: translateY(2px);
+        }
+        
+
+        .container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 2rem;
+            padding-top: 6.5rem;
+            overflow: scroll;
+        }
+
+        .container .card {
+            width: 100%;
+            min-height: 100%;
+            border: none;
+        }
+        
+        
+        
+        th, td {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .btn-light {
+            background: var(--white);
+            color: var(--black);
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: .1s ease-in;
+        }
+
+        .btn-light:hover {
+            background: var(--white);
+            color: var(--black);
+            transform: translateY(2px);
+        }
+
+        .hide {
+            display: none;
+        }
+
+
+
+
+        @media (max-width:768px) {
+
+            .header {
+                padding: 0 2rem;
+            }
+
+        } 
+
+                
+    </style>
+
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="header">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='assets/logo.jpeg') }}" alt="">
+                <h2 class="text-secondary">Healthy Leaf</h2>
+            </div>
+            <div class="links">
+                <ul class="nav">
+                    <li class="nav-item"><a href="{{ url_for('to_first_page') }}" class="nav-link text-secondary">Pindai Gambar</a></li>
+                    <li class="nav-item"><a href="{{ url_for('bantuan') }}" class="nav-link text-secondary">Bantuan</a></li>
+                    <li class="nav-item"><a href="{{ url_for('histori') }}" class="nav-link text-secondary">Histori</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link text-secondary dropdown-toggle" href="#" id="header-dropdown-links" role="button" data-bs-toggle="dropdown" aria-expanded="false">Status</a>
+                        <ul class="dropdown-menu" aria-labelledby="header-dropdown-links">
+                            <li><div class="dropdown-item">Status Model <span>{% if status_model %}Aktif{% else %}Nonaktif{% endif %}</span></div></li>
+                            <li><div class="dropdown-item">Nama Pengguna <span>{{ username }}</span></div></li>
+                            <li><div class="dropdown-item">Algoritma <span>SVM</span></div></li>
+                            <li><div class="dropdown-item">Ekstraksi Fitur <span>HOG</span></div></li>
+                            <li><div class="dropdown-item">Kernel <span>Linear</span></div></li>
+                            <li><div class="dropdown-item">Akurasi <span>75%</span></div></li>
+                        </ul> 
+                    </li>
+                </ul>
+            </div>
+            <div class="login">
+                <button class="btn btn-light logout-btn" onclick="logout(event)">Logout</button>
+                <button class="btn btn-light offcanvas-btn hide" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight"><i class="fas fa-bars"></i></button>
+
+                <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+                    <div class="offcanvas-header">
+                        <h5 id="offcanvasRightLabel">Offcanvas right</h5>
+                        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                    </div>
+                    <div class="offcanvas-body">
+                        <div class="offcanvas-links">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item"><a href="{{ url_for('to_first_page') }}" class="nav-link text-secondary">Pindai Gambar</a></li>
+                                <li class="list-group-item"><a href="{{ url_for('bantuan') }}" class="nav-link text-secondary">Bantuan</a></li>
+                                <li class="list-group-item"><a href="{{ url_for('histori') }}" class="nav-link text-secondary">Histori</a></li>
+                                <li class="list-group-item"><a href="#" class="nav-link text-secondary" onclick="logout(event)">Logout</a></li>
+                              </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="card">
+                {% if items %}
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nama File</th>
+                                <th style="width: 12rem;">Gambar</th>
+                                <th>Resolusi</th>
+                                <th>Status</th>
+                                <th>Pilihan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                                <tr>
+                                    <td>{{ item[0] }}</td>
+                                    <td>{{ item[3] }}</td>
+                                    <td><img src="{{ url_for('uploaded_file', filename=item[2]) }}" alt="" class="" style="max-width: 10rem;"></td>
+                                    <td>{{ item[5] }}</td>
+                                    <td>{{ item[4] }}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-light btn-sm detail-button" data-gambar="{{ url_for('uploaded_file', filename=item[2]) }}" data-status="{{ item[4] }}">Detail</button>
+                                        <form action="/delete_history/{{ item[0] }}/{{ item[1] }}" method="post" style="display: inline;">
+                                            <button type="submit" class="btn btn-light btn-sm">Hapus</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>Histori tidak ditemukan!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    alert('{{ message }}');
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </script>
+
+    <script>
+        const offcanvasBtn  = document.querySelector('.offcanvas-btn');
+        const navbarBox     = document.querySelector('.header .links');
+        const logoutBtn     = document.querySelector('.logout-btn');
+
+        // Aksi setelah halaman dimuat 
+        document.addEventListener('DOMContentLoaded', function() {
+            {% if not username %}
+                alert('Anda harus login terlebih dahulu!');
+                window.location.href = "{{ url_for('index') }}";
+            {% endif %}
+        });
+
+        // Fungsi jika lebar layar dibawah 768
+        document.addEventListener('DOMContentLoaded', function() {
+            function checkScreenWidth() {
+                if (window.innerWidth < 768) {
+                    offcanvasBtn.classList.remove('hide');
+                    navbarBox.classList.add('hide');
+                    logoutBtn.classList.add('hide');
+                } else {
+                    offcanvasBtn.classList.add('hide');
+                    navbarBox.classList.remove('hide');
+                    logoutBtn.classList.remove('hide');
+                }
+            }
+
+            checkScreenWidth(); 
+            window.addEventListener('resize', checkScreenWidth);
+        });
+
+
+        // Fungsi konfirmasi untuk kembali ke Beranda
+        function logout(event) {
+            event.preventDefault();
+            let userConfirmed = confirm('Apakah anda yakin?');
+            if (userConfirmed) {
+                window.location.href = "{{ url_for('logout') }}";
+            }
+        }
+        
+        
+
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
+

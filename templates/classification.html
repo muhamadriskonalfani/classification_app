@@ -116,19 +116,30 @@
             justify-content: center;
             align-items: center;
         }
-        
+
         .box-input {
+            display: flex; 
+            justify-content: center;
+            align-items: flex-start;
+            max-width: 39rem; 
+            padding: 2rem;
+            padding-top: 6.5rem;
+            overflow: scroll;
+        }
+        
+        .box-input .card {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            width: 39rem;
-            padding: 2rem;
+            width: 100%;
+            min-height: 100%;
+            border: none;
             gap: 2rem;
             text-align: center;
         }
         
-        .box-header h2 {
+        .box-input .box-header h2 {
             font-weight: 700;
         }
 
@@ -141,30 +152,50 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, .2);
         }
 
-        .grid-box .grid-image {
+        .box-input .grid-box .grid-image {
             display: flex;
+            flex-wrap: wrap;
             justify-content: center;
             align-items: center;
             gap: .5rem;
         }
 
-        .grid-box .grid-image img { 
+        .box-input .grid-box .grid-image img { 
             height: 3rem;
             cursor: pointer;
+        } 
+
+        .box-input .footer a {
+            padding: .2rem 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, .2);
+            transition: .2s ease;
+        }
+
+        .box-input .footer a:hover {
+            transform: translateY(2px);
         }
         
 
         
+
         .box-output {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 2rem;
+            padding-top: 6.5rem;
+            overflow: scroll;
+        }
+        
+        .box-output .card {
             display: grid;
             grid-template-areas: 'scan result'
                                  'option option';
             grid-template-columns: 3fr 2fr;
-            grid-template-rows: 5fr 1fr;
-            padding: 2rem;
-            padding-top: 4.5rem;
+            grid-template-rows: 4fr 1fr;
             width: 100%;
-            height: 100%;
+            min-height: 100%;
+            border: none;
         }
 
         .box-output .scanning {
@@ -186,10 +217,8 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, .2);
         }
 
-        .box-output .scanning .scanning-image img {
-            min-width: 15rem;
-            max-width: 40rem;
-            min-height: 15rem;
+        .box-output .scanning .scanning-image img { 
+            max-width: 40rem; 
             max-height: 15rem;
         }
 
@@ -366,9 +395,67 @@
         }
         
 
+
         .hide {
             display: none;
         }
+
+
+
+
+        @media (max-width:768px) {
+
+            .header {
+                padding: 0 2rem;
+            } 
+
+
+            .box-output .card { 
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-items: flex-start;
+                padding-bottom: 5rem;
+            } 
+
+            .box-output .scanning { 
+                justify-content: flex-start; 
+                padding: 0; 
+            }
+    
+            .box-output .scanning .scanning-image img { 
+                max-width: 100%; 
+                max-height: 100%;
+            }
+
+
+            .box-output .results { 
+                padding: 0; 
+            }
+            
+
+            .box-output .options {
+                position: fixed;
+                bottom: 0; 
+                left: 0;
+                height: 5rem; 
+                background: #ddd; 
+            }
+            
+            .box-output .options .box-delete {
+                width: 5rem; 
+            }
+    
+            .box-output .options .box-plus, 
+            .box-output .options .new-box-item, 
+            .box-output .options .box-item { 
+                width: 3rem;
+                height: 3rem; 
+                border-radius: 5px;
+            }
+            
+
+        } 
 
                 
     </style>
@@ -400,96 +487,121 @@
                 </ul>
             </div>
             <div class="login">
-                <button class="btn btn-light" onclick="logout(event)">Logout</button>
+                <button class="btn btn-light logout-btn" onclick="logout(event)">Logout</button>
+                <button class="btn btn-light offcanvas-btn hide" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight"><i class="fas fa-bars"></i></button>
+
+                <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+                    <div class="offcanvas-header">
+                        <h5 id="offcanvasRightLabel">Offcanvas right</h5>
+                        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                    </div>
+                    <div class="offcanvas-body">
+                        <div class="offcanvas-links">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item"><a href="{{ url_for('to_first_page') }}" class="nav-link text-secondary">Pindai Gambar</a></li>
+                                <li class="list-group-item"><a href="{{ url_for('bantuan') }}" class="nav-link text-secondary">Bantuan</a></li>
+                                <li class="list-group-item"><a href="{{ url_for('histori') }}" class="nav-link text-secondary">Histori</a></li>
+                                <li class="list-group-item"><a href="#" class="nav-link text-secondary" onclick="logout(event)">Logout</a></li>
+                              </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
         <section class="box-input {% if is_uploaded %}hide{% endif %}">
-            <div class="box-header">
-                <h2 class="text-secondary">Unggah gambar daun padi untuk mendeteksi penyakitnya</h2>
-            </div>
-            <div class="box-upload">
-                <form action="/add_to_database" method="POST" enctype="multipart/form-data">
-                    <input type="text" name="id_pengguna" class="hide" value="{{ id_pengguna }}">
-                    <input type="file" name="file" class="input-file hide">
-                    <button class="btn btn-primary btn-lg input-file-btn">Upload Image</button>
-                    <button type="submit" name="submit" class="submit-file hide"></button>
-                </form>
-            </div>
-            <div class="grid-box">
-                <h6 class="text-secondary">Atau coba salah satu gambar ini</h6>
-                <div class="grid-image">
-                    <img src="{{ url_for('static', filename='assets/sampel_1.jpg') }}" alt="" class="img-thumbnail" data-gambar="sampel_1.jpg">
-                    <img src="{{ url_for('static', filename='assets/sampel_2.jpg') }}" alt="" class="img-thumbnail" data-gambar="sampel_2.jpg">
-                    <img src="{{ url_for('static', filename='assets/sampel_3.jpg') }}" alt="" class="img-thumbnail" data-gambar="sampel_3.jpg">
+            <div class="card">
+                <div class="box-header">
+                    <h2 class="text-secondary">Unggah gambar daun padi untuk mendeteksi penyakitnya</h2>
+                </div>
+                <div class="box-upload">
+                    <form action="/add_to_database" method="POST" enctype="multipart/form-data">
+                        <input type="text" name="id_pengguna" class="hide" value="{{ id_pengguna }}">
+                        <input type="file" name="file" class="input-file hide">
+                        <button class="btn btn-primary btn-lg input-file-btn">Upload Image</button>
+                        <button type="submit" name="submit" class="submit-file hide"></button>
+                    </form>
+                </div>
+                <div class="grid-box">
+                    <h6 class="text-secondary">Atau coba salah satu gambar ini</h6>
+                    <div class="grid-image">
+                        <img src="{{ url_for('static', filename='assets/sampel_1.jpg') }}" alt="" class="img-thumbnail" data-gambar="sampel_1.jpg">
+                        <img src="{{ url_for('static', filename='assets/sampel_2.jpg') }}" alt="" class="img-thumbnail" data-gambar="sampel_2.jpg">
+                        <img src="{{ url_for('static', filename='assets/sampel_3.jpg') }}" alt="" class="img-thumbnail" data-gambar="sampel_3.jpg">
+                    </div>
+                </div>
+                <div class="footer">
+                    <h6 class="text-secondary">Dengan mengunggah gambar daun padi yang terinfeksi, program akan mengetahui jenis penyakitnya.</h6>
+                    <a href="{{ url_for('to_second_page') }}" class="btn btn-light {% if not items %}hide{% endif %}"><i class="fas fa-chevron-right"></i></a>
                 </div>
             </div>
-            <h6 class="text-secondary">Dengan mengunggah gambar daun padi yang terinfeksi, program akan mengetahui jenis penyakitnya.</h6>
         </section>
 
         <section class="box-output {% if not is_uploaded %}hide{% endif %}">
-            <div class="scanning">
-                <div class="scanning-image">
-                    <img src="" alt="" class="img-thumbnail">
+            <div class="card">
+                <div class="scanning">
+                    <div class="scanning-image">
+                        <img src="" alt="" class="img-thumbnail">
+                    </div>
+                    <div class="progress-scanning">
+                        <div class="progress-bar"></div>
+                    </div>
+                    <div class="loading-text">
+                        <h5 class="text-secondary">Selesai <i class="fas fa-check"></i></h5> 
+                    </div>
                 </div>
-                <div class="progress-scanning">
-                    <div class="progress-bar"></div>
-                </div>
-                <div class="loading-text">
-                    <h5 class="text-secondary">Selesai <i class="fas fa-check"></i></h5> 
-                </div>
-            </div>
 
-            <div class="results">
-                <button class="btn btn-primary btn-lg pseudo-input-file-btn" onclick="clickInputFileBtn()">Upload Image</button>
-                <div class="result-box">
-                    <div class="result-item">
-                        <div>Nama Gambar:</div>
-                        <div class="bg-light filename"></div>
-                    </div>
-                    <div class="result-item">
-                        <div>Ukuran Gambar:</div>
-                        <div class="bg-light filesize"></div>
-                    </div>
-                    <div class="result-item">
-                        <div>Prediksi:</div>
-                        <div class="bg-light prediction"></div>
+                <div class="results">
+                    <button class="btn btn-primary btn-lg pseudo-input-file-btn" onclick="clickInputFileBtn()">Upload Image</button>
+                    <div class="result-box">
+                        <div class="result-item">
+                            <div>Nama Gambar:</div>
+                            <div class="bg-light filename"></div>
+                        </div>
+                        <div class="result-item">
+                            <div>Ukuran Gambar:</div>
+                            <div class="bg-light filesize"></div>
+                        </div>
+                        <div class="result-item">
+                            <div>Prediksi:</div>
+                            <div class="bg-light prediction"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="options">
-                <div class="box-options">
-                    <div class="box-scroll">
-                        <div class="btn btn-primary box-plus" onclick="clickInputFileBtn()"><i class="fas fa-plus"></i></div>
-                        <div class="btn new-box-item skeleton hide"></div>
+                <div class="options">
+                    <div class="box-options">
+                        <div class="box-scroll">
+                            <div class="btn btn-primary box-plus" onclick="clickInputFileBtn()"><i class="fas fa-plus"></i></div>
+                            <div class="btn new-box-item skeleton hide"></div>
+                            {% if items %}
+                                {% for item in items %}
+                                    <div class="box-item" data-gambar="{{ url_for('uploaded_file', filename=item[2]) }}" data-nama-file="{{ item[3] }}" data-status="{{ item[4] }}" data-resolusi="{{ item[5] }}">
+                                        <img src="{{ url_for('uploaded_file', filename=item[2]) }}" alt="" class="btn btn-light">
+                                    </div>
+                                    <form action="/delete/{{ item[0] }}/{{ item[1] }}" method="post" class="delete-item hide">
+                                        <button type="submit" class="btn btn-light btn-sm">Hapus</button>
+                                    </form>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="box-delete">
                         {% if items %}
-                            {% for item in items %}
-                                <div class="box-item" data-gambar="{{ url_for('uploaded_file', filename=item[2]) }}" data-nama-file="{{ item[3] }}" data-status="{{ item[4] }}" data-resolusi="{{ item[5] }}">
-                                    <img src="{{ url_for('uploaded_file', filename=item[2]) }}" alt="" class="btn btn-light">
-                                </div>
-                                <form action="/delete/{{ item[0] }}/{{ item[1] }}" method="post" class="delete-item hide">
-                                    <button type="submit" class="btn btn-light btn-sm">Hapus</button>
-                                </form>
-                            {% endfor %}
+                            <form action="/delete_all_images/{{ id_pengguna }}" method="post" class="delete-all-images hide">
+                                <button type="submit" class="btn btn-light btn-sm">Hapus Semua</button>
+                            </form>
                         {% endif %}
-                    </div>
-                </div>
-                <div class="box-delete">
-                    {% if items %}
-                        <form action="/delete_all_images/{{ id_pengguna }}" method="post" class="delete-all-images hide">
-                            <button type="submit" class="btn btn-light btn-sm">Hapus Semua</button>
-                        </form>
-                    {% endif %}
-                    <div class="btn-group dropup">
-                        <button type="button" class="btn btn-secondary to-active-delete-btn">Hapus Gambar</button>
-                        <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span class="visually-hidden">Toggle Dropdown</span>
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><div class="dropdown-item this-image">Hapus gambar ini</div></li>
-                            <li><div class="dropdown-item all-images">Hapus semua gambar</div></li>
-                        </ul>
+                        <div class="btn-group dropup">
+                            <button type="button" class="btn btn-secondary to-active-delete-btn">Hapus Gambar</button>
+                            <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="visually-hidden">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><div class="dropdown-item this-image">Hapus gambar ini</div></li>
+                                <li><div class="dropdown-item all-images">Hapus semua gambar</div></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -499,7 +611,9 @@
     <script>
         {% with messages = get_flashed_messages() %}
             {% if messages %}
-                alert('{{ messages[0] }}');
+                {% for message in messages %}
+                    alert('{{ message }}');
+                {% endfor %}
             {% endif %}
         {% endwith %}
     </script>
@@ -517,19 +631,26 @@
         const deleteAllImages       = document.querySelector('.box-delete .all-images');
         const boxInput              = document.querySelector('section.box-input');
         const boxOutput             = document.querySelector('section.box-output');
+        const offcanvasBtn  = document.querySelector('.offcanvas-btn');
+        const navbarBox     = document.querySelector('.header .links');
+        const logoutBtn     = document.querySelector('.logout-btn');
 
         // Update progress bar
-        function updateProgress() {
-            fetch('/progress')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.progress < 101) {
-                        document.querySelector('.loading-text .text-secondary').innerHTML = `Memindai...`;
-                        document.querySelector('.progress-scanning .progress-bar').style.width = `${data.progress}%`;
-                        setTimeout(updateProgress, 500);
-                    } 
-                });
-        } 
+        async function updateProgress() {
+            try {
+                const response = await fetch('/progress');
+                const data = await response.json();
+                
+                if (data.progress < 101) {
+                    document.querySelector('.loading-text .text-secondary').innerHTML = `Memindai...`;
+                    document.querySelector('.progress-scanning .progress-bar').style.width = `${data.progress}%`;
+                    setTimeout(updateProgress, 500);
+                } 
+                
+            } catch (error) {
+                console.error('Terjadi kesalahan saat memperbarui progress:', error);
+            }
+        }         
 
         // Fungsi klik otomatis tombol "Pilih gambar" 
         function clickInputFileBtn() {
@@ -558,6 +679,11 @@
             listImages.forEach((images) => images.classList.remove('active'));
             document.querySelector('.new-box-item').classList.remove('hide');
             document.querySelector('.scanning-image').style.minWidth = '40rem';
+            document.querySelector('.scanning-image').style.minHeight = '15rem';
+            if (window.innerWidth < 768) {
+                document.querySelector('.scanning-image').style.minWidth = '100%';
+                document.querySelector('.scanning-image').style.minHeight = '100%';
+            }
             document.querySelector('.scanning-image').classList.add('skeleton');
             document.querySelector('.results .filename').classList.add('skeleton');
             document.querySelector('.results .filesize').classList.add('skeleton');
@@ -646,9 +772,34 @@
             if (listImages.length > 0) {
                 listImages[0].click();
             }
+            
+            {% if not username %}
+                alert('Anda harus login terlebih dahulu!');
+                window.location.href = "{{ url_for('index') }}";
+            {% endif %}
         });
         
-        
+        // Fungsi jika lebar layar dibawah 768
+        document.addEventListener('DOMContentLoaded', function() {
+            function checkScreenWidth() {
+                if (window.innerWidth < 768) {
+                    offcanvasBtn.classList.remove('hide');
+                    navbarBox.classList.add('hide');
+                    logoutBtn.classList.add('hide');
+                    pseudoInputFileBtn.classList.add('hide');
+                    deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                } else {
+                    offcanvasBtn.classList.add('hide');
+                    navbarBox.classList.remove('hide');
+                    logoutBtn.classList.remove('hide');
+                    pseudoInputFileBtn.classList.remove('hide');
+                    deleteBtn.innerHTML = 'Hapus Gambar';
+                }
+            }
+
+            checkScreenWidth(); 
+            window.addEventListener('resize', checkScreenWidth);
+        });
         
 
         // Fungsi konfirmasi untuk kembali ke Beranda
@@ -659,6 +810,7 @@
                 window.location.href = "{{ url_for('logout') }}";
             }
         }
+        
         
         
 

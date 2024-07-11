@@ -144,7 +144,9 @@
     <script>
         {% with messages = get_flashed_messages() %}
             {% if messages %}
-                alert('{{ messages[0] }}');
+                {% for message in messages %}
+                    alert('{{ message }}');
+                {% endfor %}
             {% endif %}
         {% endwith %}
     </script>

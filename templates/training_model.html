@@ -52,7 +52,8 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            width: 39rem;
+            max-width: 39rem;
+            width: 100%;
             height: 100%;
             padding: 2rem;
         }
@@ -130,35 +131,52 @@
 
     <script>
         // Update progress bar
-        function updateProgress() {
-            fetch('/progress')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.progress < 101) {
-                        document.querySelector('.step-process.text-secondary span').innerText = `${data.progress}%`;
-                        document.querySelector('.progress-training .progress-bar').style.width = `${data.progress}%`;
-                        setTimeout(updateProgress, 500);
-                    } 
-                });
-        } 
-
+        async function updateProgress() {
+            try {
+                const response = await fetch('/progress');
+                const data = await response.json();
+                
+                if (data.progress < 101) {
+                    document.querySelector('.step-process.text-secondary span').innerText = `${data.progress}%`;
+                    document.querySelector('.progress-training .progress-bar').style.width = `${data.progress}%`;
+                    setTimeout(updateProgress, 500);
+                } 
+                
+            } catch (error) {
+                console.error('Terjadi kesalahan saat memperbarui progress:', error);
+            }
+        }         
+        
+        // Fungsi untuk menjalankan fungsi python latih_model_klasifikasi
         async function trainModelClassification() {
-            const response = await fetch('/latih_model_klasifikasi', {
-                method: 'GET'
-            });
-            const data = await response.json();
-
-            if (data.status_model) {
-                window.location.href = "{{ url_for('classification') }}";
+            try {
+                const response = await fetch('/latih_model_klasifikasi', {
+                    method: 'GET'
+                });
+                const data = await response.json();
+    
+                if (data.status_model) {
+                    window.location.href = "{{ url_for('classification') }}";
+                } else {
+                    alert('Terjadi kesalahan saat membuat model klasifikasi!');
+                    window.location.href = "{{ url_for('index') }}";
+                }
+            } catch (error) {
+                console.error('Terjadi kesalahan:', error);
             }
         }
 
-        // Membuat model klasifikasi sebelum halaman ditampilkan
+        // Membuat model klasifikasi setelah halaman ditampilkan
         document.addEventListener('DOMContentLoaded', function() {
-            {% if not status_model %}
-                updateProgress();
+            {% if not username %}
+                alert('Anda harus login terlebih dahulu!');
+                window.location.href = "{{ url_for('index') }}";
+            {% else %}
+                {% if not status_model %}
+                    updateProgress();
+                {% endif %}
+                trainModelClassification();
             {% endif %}
-            trainModelClassification();
         });
 
 
