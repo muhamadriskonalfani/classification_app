@@ -1,0 +1,42 @@
+{% extends 'elements/base.html' %}
+
+{% block title %}Cetak Laporan - RiceLeaf Care{% endblock %}
+
+{% block content %}
+    <div class="container-fluid mt-2">
+        <h2 class="mb-3 text-center">Laporan Histori Hasil Klasifikasi</h2>
+
+        <!-- Tabel Histori -->
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Tanggal</th>
+                        <th>Nama File</th>
+                        <th>Hasil Klasifikasi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in history_data %}
+                    <tr>
+                        <td>{{ record.no }}</td>
+                        <td>{{ record.tanggal }}</td>
+                        <td>{{ record.nama_file }}</td>
+                        <td>{% if record.status %}{{ record.status }}{% else %}{{ record.hasil_klasifikasi }}{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script type="text/javascript">
+        // Otomatis melakukan print setelah halaman dimuat
+        window.onload = function() {
+            window.print();
+        };
+    </script>
+{% endblock %}

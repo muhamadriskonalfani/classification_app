@@ -1,0 +1,94 @@
+{% extends 'elements/base.html' %}
+
+{% block title %}Informasi Model - RiceLeaf Care{% endblock %}
+
+{% block navbar %}
+    {% include 'elements/navbar2.html' %}
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-2">
+        <h2 class="mb-3">Informasi Model Klasifikasi</h2>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">1. Jenis Model Klasifikasi</h5>
+            </div>
+            <div class="card-body">
+                <p>Aplikasi ini menggunakan model klasifikasi <strong>Support Vector Machine (SVM)</strong> untuk mendeteksi penyakit pada daun padi. SVM adalah algoritma yang efektif untuk klasifikasi dan regresi, terutama dalam situasi di mana jumlah fitur lebih besar dari jumlah sampel.</p>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">2. Metode yang Digunakan</h5>
+            </div>
+            <div class="card-body">
+                <h6>2.1. Ekstraksi Fitur HOG</h6>
+                <p>Model ini menggunakan <strong>Histogram of Oriented Gradients (HOG)</strong> untuk ekstraksi fitur dari gambar daun padi. Metode HOG efektif dalam mendeteksi bentuk dan pola, sehingga sangat cocok untuk aplikasi visi komputer.</p>
+
+                <h6>2.2. Pelatihan Model</h6>
+                <p>Model SVM dilatih menggunakan dataset gambar daun padi yang terlabeli, yang mencakup berbagai penyakit seperti Bacterial Leaf Blight, Leaf Smut, dan Brown Spot. Data ini dibagi menjadi data pelatihan dan data pengujian untuk evaluasi model.</p>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">3. Keunggulan Menggunakan Model Klasifikasi Ini</h5>
+            </div>
+            <div class="card-body">
+                <ul>
+                    <li>Mampu mendeteksi beberapa penyakit sekaligus pada satu gambar daun.</li>
+                    <li>Memberikan hasil klasifikasi yang cepat dan akurat.</li>
+                    <li>Dapat terus diperbarui dengan dataset baru untuk meningkatkan performa.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">4. Kinerja Model</h5>
+            </div>
+            <div class="card-body">
+                {% if metrics %}
+                    <p>Model klasifikasi dievaluasi menggunakan metrik berikut:</p>
+                    <ul>
+                        <li><strong>Akurasi:</strong> {{ (metrics.accuracy * 100) | round(2) }}%</li>
+                        <li><strong>Presisi:</strong> {{ (metrics.precision * 100) | round(2) }}%</li>
+                        <li><strong>Recall:</strong> {{ (metrics.recall * 100) | round(2) }}%</li>
+                        <li><strong>F1-Score:</strong> {{ (metrics.f1_score * 100) | round(2) }}%</li>
+                    </ul>
+                    <p>Dengan pemilihan fitur yang tepat dan parameter yang dioptimalkan, model ini dapat memberikan hasil klasifikasi yang akurat untuk membantu petani dalam mengidentifikasi penyakit pada daun padi.</p>
+                    <p><a href="#" onclick="deleteModelFiles()">Hapus Model!</a></p>
+                {% else %}
+                    <h4 class="mb-3">Tidak Ada Model Klasifikasi</h4>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        function deleteModelFiles() {
+            if (confirm('Hapus model klasifikasi saat ini?')) {
+                fetch('{{ url_for("delete_model_files") }}', {
+                    method: 'DELETE',
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.errors.length > 0) {
+                        alert('Terjadi kesalahan: ' + data.errors.join(', '));
+                    } else {
+                        alert('File berhasil dihapus: ' + data.deleted_files.join(', '));
+                        window.location.href = '{{ url_for("informasi_model") }}';
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan saat menghapus file.');
+                });
+            }
+        }
+    </script>
+{% endblock %}

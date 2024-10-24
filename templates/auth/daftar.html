@@ -1,0 +1,43 @@
+{% extends 'elements/base.html' %}
+
+{% block title %}Daftar - RiceLeaf Care{% endblock %}
+
+{% block navbar %}
+    {% include 'elements/navbar1.html' %}
+{% endblock %}
+
+{% block content %}
+    <!-- Registration Form -->
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-4">
+                <h2 class="text-center mb-4">Daftar ke RiceLeaf Care</h2>
+                <form method="POST" action="{{ url_for('daftar') }}">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" name="new_username" class="form-control" id="username" placeholder="Masukkan username" required autofocus>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control" id="email" placeholder="Masukkan email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" name="new_password" class="form-control" id="password" placeholder="Masukkan password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Konfirmasi Password</label>
+                        <input type="password" name="confirm_password" class="form-control" id="confirmPassword" placeholder="Konfirmasi password" required>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">Daftar</button>
+                    </div>
+                </form>
+                <div class="mt-3 text-center">
+                    <p>Sudah punya akun? <a href="{{ url_for('login') }}">Login</a></p>
+                    <p><a href="/">Kembali</a></p>
+                </div>
+            </div>
+        </div>
+    </div>    
+{% endblock %}

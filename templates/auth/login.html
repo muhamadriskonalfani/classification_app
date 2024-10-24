@@ -1,0 +1,35 @@
+{% extends 'elements/base.html' %}
+
+{% block title %}Login - RiceLeaf Care{% endblock %}
+
+{% block navbar %}
+    {% include 'elements/navbar1.html' %}
+{% endblock %}
+
+{% block content %}
+    <!-- Login Form -->
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-4">
+                <h2 class="text-center mb-4">Login ke RiceLeaf Care</h2>
+                <form method="POST" action="{{ url_for('login') }}">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" placeholder="Masukkan username" required autofocus> <!-- Tambahkan name="username" -->
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Masukkan password" required> <!-- Tambahkan name="password" -->
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Login</button> <!-- Form method harus POST -->
+                    </div>
+                </form>
+                <div class="mt-3 text-center">
+                    <p>Belum punya akun? <a href="{{ url_for('daftar') }}">Daftar</a></p> <!-- Ubah route register -->
+                    <p><a href="/">Kembali</a></p>
+                </div>
+            </div>
+        </div>
+    </div>    
+{% endblock %}

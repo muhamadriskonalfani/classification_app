@@ -1,0 +1,24 @@
+Daftar Library yang dibutuhkan
+Silahkan install sendiri di terminal
+
+# Install Flask untuk web framework
+pip install Flask
+
+# Install OpenCV untuk pemrosesan gambar
+pip install opencv-python
+
+# Install scikit-learn untuk machine learning dan model SVM
+pip install scikit-learn
+
+# Install scikit-image untuk ekstraksi fitur HOG
+pip install scikit-image
+
+# Install joblib untuk menyimpan dan memuat model
+pip install joblib
+
+# Install mysql-connector-python untuk koneksi database mysql
+pip install mysql-connector-python
+
+# Install bcrypt untuk hashing dan verifikasi password.
+pip install bcrypt
+

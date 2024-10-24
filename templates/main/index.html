@@ -1,0 +1,75 @@
+{% extends 'elements/base.html' %}
+
+{% block title %}RiceLeaf Care{% endblock %}
+
+{% block navbar %}
+    {% include 'elements/navbar1.html' %}
+{% endblock %}
+
+{% block content %}
+    <!-- Main content -->
+    <div class="container text-center mt-5">
+        <h1 class="display-4">Selamat Datang di RiceLeaf Care</h1>
+        <p class="lead mt-3">Platform ini dirancang untuk membantu petani mendeteksi penyakit pada daun padi secara cepat dan akurat.</p>
+        <p>Dengan teknologi terbaru, kami dapat mendeteksi penyakit seperti <em>bacterial leaf blight</em>, <em>leaf smut</em>, dan <em>brown spot</em>. Mulai sekarang untuk menjaga tanaman padi Anda tetap sehat dan produktif.</p>
+        <div class="mt-4">
+            <button id="trainModelBtn" class="btn btn-primary btn-lg">Mulai</button>
+        </div>
+        <div id="longProcessMessage" class="text-muted mt-3"></div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        // Fungsi untuk mengirimkan request ke endpoint ketika tombol diklik
+        function trainModel(buttonElement) {
+            // Nonaktifkan semua elemen saat tombol diklik
+            disableAllElements();
+            buttonElement.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <div class="spinner-border text-light" role="status" style="width: 25px; height: 25px;">
+                        <span class="visually-hidden">Sedang memproses...</span>
+                    </div>
+                    <span class="ms-2">Sedang memproses...</span>
+                </div>
+            `;
+
+            // Fungsi untuk menampilkan pesan jika proses membutuhkan waktu lama
+            let longProcessTimeout = setTimeout(function() {
+                document.getElementById('longProcessMessage').innerHTML = 'Proses sedang berjalan, ini mungkin memerlukan sedikit waktu.';
+            }, 5000);
+        
+            // Lakukan request ke endpoint
+            fetch('/train_model', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                clearTimeout(longProcessTimeout);
+                if (data.status === 'success' && data.redirect) {
+                    // Jika berhasil dan URL redirect ada, arahkan ke halaman klasifikasi
+                    window.location.href = data.redirect;
+                } else {
+                    console.log(data.message);
+                    alert(`Error: ${data.message}`);
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                clearTimeout(longProcessTimeout);
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat memproses permintaan. Silakan coba lagi.');
+                location.reload();
+            });
+        }
+
+        // JavaScript untuk melatih model jika pengguna sudah login
+        document.getElementById('trainModelBtn').addEventListener('click', function(event) {
+            {% if username %}
+                trainModel(event.target);
+            {% else %}
+                window.location.href = "{{ url_for('login') }}";
+            {% endif %}
+        });
+    </script>
+{% endblock %}

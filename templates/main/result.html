@@ -1,0 +1,105 @@
+{% extends 'elements/base.html' %}
+
+{% block title %}Hasil - RiceLeaf Care{% endblock %}
+
+{% block navbar %}
+    {% include 'elements/navbar2.html' %}
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-2">
+        <div class="row">
+        {% if all_results %}
+            <!-- Kolom pertama untuk menampilkan detail hasil klasifikasi -->
+            <div class="col-md-6" id="resultDetail">
+                <h2 class="mb-3">Hasil Klasifikasi</h2>
+                <img id="resultImage" src="{{ all_results[0].image_url }}" alt="Gambar yang diunggah" class="img-thumbnail mb-3 result-image">
+                <h5>Nama File: <span id="resultFileName">{{ all_results[0].filename }}</span></h5>
+                <h5>Hasil Deteksi: <span id="resultDisease" class="text-success">
+                    {% if all_results[0].status %}{{ all_results[0].status }}{% else %}{{ all_results[0].max_disease }} ({{ '%.2f' % all_results[0].max_percentage }}%){% endif %}
+                </span></h5>
+                <p class="text-muted mb-3">Note: hasil prediksi ini diambil berdasarkan tingkat kemiripan dengan dataset.</p>
+
+                <h5>Total Gambar: {{ disease_count['total'] }}</h5>
+                <ul>
+                    {% for disease, count in disease_count.items() %}
+                        {% if disease != 'total' %}
+                            <li>{{ disease }}: {{ count }}</li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+
+                <div class="text-start mb-3">
+                    <a href="/classification">Kembali</a>
+                </div>
+            </div>
+
+            <!-- Kolom kedua untuk menampilkan daftar semua hasil klasifikasi -->
+            <div class="col-md-6">
+                <h2 class="mb-3">Daftar Hasil Klasifikasi</h2>
+                <div style="height: 66.5vh; overflow: auto;">
+                    <div class="list-group" id="resultsList">
+                        {% for result in all_results %}
+                        <a href="javascript:void(0);" class="list-group-item list-group-item-action result-item" 
+                            data-image-url="{{ result.image_url|e }}"
+                            data-image-name="{{ result.filename|e }}"
+                            data-max-disease="{{ result.max_disease|e }}"
+                            data-max-percentage="{{ result.max_percentage }}"
+                            data-status="{{ result.status|e }}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>{{ result.filename }}</span>
+                                {% if result.status %}
+                                    <span class="badge bg-danger">{{ result.status }}</span>
+                                {% else %}
+                                    <span class="badge bg-success">{{ result.max_disease }} ({{ '%.2f' % result.max_percentage }}%)</span>
+                                {% endif %}
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-md-6">
+                <h2 class="mb-3">Tidak Ada Hasil Klasifikasi</h2>
+            </div>
+        {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        // Function untuk menampilkan hasil klasifikasi di kolom pertama saat salah satu hasil diklik
+        function showResult(element) {
+            // Ambil data dari atribut data-* di elemen <a>
+            const imageUrl = element.getAttribute('data-image-url');
+            const imageName = element.getAttribute('data-image-name');
+            const maxDisease = element.getAttribute('data-max-disease');
+            const maxPercentage = element.getAttribute('data-max-percentage');
+            const status = element.getAttribute('data-status');
+
+            // Update gambar
+            document.getElementById('resultImage').src = imageUrl;
+
+            // Update nama gambar
+            document.getElementById('resultFileName').innerText = imageName;
+
+            // Update penyakit dengan persentase tertinggi
+            let diseaseText = status ? `${status}` : `${maxDisease} (${parseFloat(maxPercentage).toFixed(2)}%)`;
+            document.getElementById('resultDisease').innerText = diseaseText;
+        }
+
+        // Tambahkan event listener untuk semua elemen dengan class 'result-item'
+        document.addEventListener('DOMContentLoaded', function () {
+            const resultItems = document.querySelectorAll('.result-item');
+            resultItems.forEach(item => {
+                item.addEventListener('click', function () {
+                    resultItems.forEach(i => i.classList.remove('bg-secondary'));
+                    this.classList.add('bg-secondary');
+                    showResult(this);
+                });
+            });
+        });
+    </script>
+{% endblock %}

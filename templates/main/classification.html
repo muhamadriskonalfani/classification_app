@@ -1,0 +1,50 @@
+{% extends 'elements/base.html' %}
+
+{% block title %}Klasifikasi - RiceLeaf Care{% endblock %}
+
+{% block navbar %}
+    {% include 'elements/navbar2.html' %}
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-2">
+        <h2 class="mb-3">Unggah Gambar Daun Padi</h2>
+        <form class="form-group" action="/upload" method="POST" enctype="multipart/form-data" id="uploadForm">
+            <input id="fileInput" class="form-control" type="file" name="file" accept="image/*" multiple style="display: none;">
+            <div class="mb-3">
+                <button type="button" class="btn btn-primary" id="uploadButton">Unggah</button>
+            </div>
+        </form>
+        <p class="text-muted mb-3">Note: Anda bisa unggah satu atau banyak gambar sekaligus.</p>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        // Function to update the upload button to a spinner
+        function updateButtonToSpinner(button) {
+            button.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <div class="spinner-border text-light" role="status" style="width: 20px; height: 20px;">
+                        <span class="visually-hidden">Sedang memproses...</span>
+                    </div>
+                    <span class="ms-2">Sedang memproses...</span>
+                </div>
+            `;
+            button.setAttribute("disabled", "true"); // Disable the button during processing
+        }
+
+        // Show the file input when the upload button is clicked
+        document.getElementById('uploadButton').addEventListener('click', function() {
+            document.getElementById('fileInput').click();
+        });
+
+        // Handle the file input change event to submit the form
+        document.getElementById('fileInput').addEventListener('change', function() {
+            const uploadButton = document.getElementById('uploadButton');
+            disableAllElements(); // Nonaktifkan semua tombol
+            updateButtonToSpinner(uploadButton); // Change button to spinner
+            document.getElementById('uploadForm').submit(); // Submit the form
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'elements/base.html' %}
+
+{% block title %}Informasi Penyakit - RiceLeaf Care{% endblock %}
+
+{% block navbar %}
+    {% include 'elements/navbar2.html' %}
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-2">
+        <h2 class="mb-3">Informasi Penyakit Tanaman Padi</h2>
+
+        <!-- Penyakit Bacterial Leaf Blight -->
+        <div class="card disease-card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0">1. Bacterial Leaf Blight</h5>
+            </div>
+            <div class="card-body">
+                <h6>Gejala:</h6>
+                <p>Daun menunjukkan bercak air yang menguning, yang kemudian bisa menyebar ke bagian lain dari daun.</p>
+                <h6>Penanganan:</h6>
+                <ul>
+                    <li>Penggunaan varietas tahan.</li>
+                    <li>Pengendalian hama dan gulma.</li>
+                    <li>Pemupukan yang tepat untuk memperkuat ketahanan tanaman.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Penyakit Leaf Smut -->
+        <div class="card disease-card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0">2. Leaf Smut</h5>
+            </div>
+            <div class="card-body">
+                <h6>Gejala:</h6>
+                <p>Daun padi mengalami perubahan warna menjadi hitam dan menunjukkan pertumbuhan jamur.</p>
+                <h6>Penanganan:</h6>
+                <ul>
+                    <li>Pemilihan varietas yang resisten.</li>
+                    <li>Pengaturan jarak tanam yang baik untuk sirkulasi udara.</li>
+                    <li>Penggunaan fungisida sesuai anjuran.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Penyakit Brown Spot -->
+        <div class="card disease-card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0">3. Brown Spot</h5>
+            </div>
+            <div class="card-body">
+                <h6>Gejala:</h6>
+                <p>Muncul bercak coklat pada daun yang bisa menyebabkan daun mengering.</p>
+                <h6>Penanganan:</h6>
+                <ul>
+                    <li>Pengendalian hama dengan tepat.</li>
+                    <li>Pemupukan berimbang untuk mencegah stres pada tanaman.</li>
+                    <li>Penggunaan varietas yang tahan terhadap penyakit ini.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}
